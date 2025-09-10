@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Geo Sound</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+      #map {
+        height: 500px;
+        margin: 2rem auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- LEFT COLUMN -->
+      <div class="left-panel">
+        <h2>🎵 Add New Track</h2>
+        <form
+          class="upload"
+          method="POST"
+          action="{{ url_for('api_upload_sound') }}"
+          enctype="multipart/form-data"
+        >
+          <input type="file" name="sound" accept=".mp3" required />
+          <input type="text" name="name" placeholder="Track Name" required />
+          <input type="text" name="owner" placeholder="Your Name" />
+          <input
+            type="number"
+            step="any"
+            name="lat"
+            placeholder="Latitude"
+            required
+          />
+          <input
+            type="number"
+            step="any"
+            name="lon"
+            placeholder="Longitude"
+            required
+          />
+          <button type="submit">Upload</button>
+        </form>
+
+        <h2>All Tracks</h2>
+        {% for track in tracks %}
+        <div class="track">
+          <h3>{{ track.metadata.title or track.file }}</h3>
+          {% if track.metadata.owner %}
+          <p><strong>Owner:</strong> {{ track.metadata.owner }}</p>
+          {% endif %} {% if track.metadata.lat and track.metadata.lon %}
+          <p>
+            <strong>Coordinates:</strong> {{ track.metadata.lat }}, {{
+            track.metadata.lon }}
+          </p>
+          {% endif %}
+
+          <audio controls>
+            <source
+              src="{{ url_for('serve_sound', filename=track.file) }}"
+              type="audio/mpeg"
+            />
+          </audio>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-panel">
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- Map config -->
+<script>
+    const BASE_AUDIO_URL = "{{ url_for('serve_sound', filename='') }}";
+    window.TRACKS = {{ tracks|tojson }};
+</script>
+<!-- Local JS -->
+<script src="{{ url_for('static', filename='map.js') }}"></script>
+
+  </body>
+</html>
