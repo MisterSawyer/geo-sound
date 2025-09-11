@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Optional: name your virtualenv folder
+# Virtual environment folder
 VENV=".venv"
 
 echo "Setting up virtual environment..."
@@ -16,9 +16,7 @@ echo "Installing requirements..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-echo "Running Flask app..."
-export FLASK_APP=main.py
-export FLASK_ENV=development  # Enables debug mode
+echo "Running Geo-Sound Flask app with Gunicorn..."
 
-gunicorn -w 4 -b 127.0.0.1:3333 main:app
-#flask run --host=0.0.0.0 --port=3333
+# Run Gunicorn binding only to localhost:3333 (Nginx will proxy)
+gunicorn -w 4 -b 127.0.0.1:3333 "run:app"

@@ -10,24 +10,13 @@
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-      #map {
-        height: 500px;
-        margin: 2rem auto;
-      }
-    </style>
   </head>
   <body>
     <div class="container">
       <!-- LEFT COLUMN -->
       <div class="left-panel">
-        <h2>🎵 Add New Track</h2>
-        <form
-          class="upload"
-          method="POST"
-          action="{{ url_for('api_upload_sound') }}"
-          enctype="multipart/form-data"
-        >
+        <h2>Add New Track</h2>
+        <form class="upload" enctype="multipart/form-data">
           <input type="file" name="sound" accept=".mp3" required />
           <input type="text" name="name" placeholder="Track Name" required />
           <input type="text" name="owner" placeholder="Your Name" />
@@ -50,8 +39,19 @@
 
         <h2>All Tracks</h2>
         {% for track in tracks %}
-        <div class="track">
-          <h3>{{ track.metadata.title or track.file }}</h3>
+        <div class="track" id="track-{{ track.metadata.title or track.file }}">
+          <div class="track-header">
+            <h3>{{ track.metadata.title or track.file }}</h3>
+            <!-- Delete button -->
+            <button
+              class="delete-btn"
+              onclick="deleteTrack('{{ track.metadata.title or track.file }}')"
+              title="Delete track"
+            >
+              🗑️
+            </button>
+          </div>
+
           {% if track.metadata.owner %}
           <p><strong>Owner:</strong> {{ track.metadata.owner }}</p>
           {% endif %} {% if track.metadata.lat and track.metadata.lon %}
@@ -63,7 +63,7 @@
 
           <audio controls>
             <source
-              src="{{ url_for('serve_sound', filename=track.file) }}"
+              src="{{ url_for('sound.serve_sound', filename=track.file) }}"
               type="audio/mpeg"
             />
           </audio>
@@ -79,13 +79,25 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<!-- Map config -->
-<script>
-    const BASE_AUDIO_URL = "{{ url_for('serve_sound', filename='') }}";
-    window.TRACKS = {{ tracks|tojson }};
-</script>
-<!-- Local JS -->
-<script src="{{ url_for('static', filename='map.js') }}"></script>
+    <!-- Map config -->
+    <script>
+      window.BASE_AUDIO_URL = "{{ url_for('sound.serve_sound', filename='') }}";
+      window.BASE_API_UPLOAD_URL = "{{ url_for('api.upload') }}";
+      window.BASE_API_DELETE_URL = "{{ url_for('api.delete', name='__NAME__') }}";
+      window.TRACKS = {{ tracks|tojson }};
+    </script>
+    <!-- Local JS -->
+    <script src="{{ url_for('static', filename='map.js') }}"></script>
+    <script src="{{ url_for('static', filename='tracks.js') }}"></script>
 
+    <script>
+      // Intercept form submission to use addTrack() instead of reload
+      document
+        .querySelector(".upload")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          addTrack(this);
+        });
+    </script>
   </body>
 </html>

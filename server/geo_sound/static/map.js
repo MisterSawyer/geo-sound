@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     tracks.forEach(t => {
         if (t.metadata.lat && t.metadata.lon) {
-            let audioUrl = BASE_AUDIO_URL + t.file;
+            let audioUrl = window.BASE_AUDIO_URL + t.file;
 
             let popupContent = `
                 <b>${t.metadata.title || t.file}</b><br/>
