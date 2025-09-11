@@ -51,41 +51,41 @@ document.addEventListener("DOMContentLoaded", function () {
         .bindPopup(popupContent);
 
       // Initialize Plyr when popup opens
-      marker.on("popupopen", () => {
-        const popupEl = document.querySelector(".leaflet-popup-content audio.plyr");
+      marker.on("popupopen", (e) => {
+        const popupEl = e.popup.getElement().querySelector("audio.plyr");
         if (popupEl) {
-          new Plyr(popupEl, {
+          const player = new Plyr(popupEl, {
             controls: ["play", "progress", "current-time", "duration"],
             autoplay: false,
           });
 
+          // After initializing Plyr, restructure its controls
+          const ctrls = popupEl
+            .closest(".plyr")
+            .querySelector(".plyr__controls");
+          if (ctrls && !ctrls.querySelector(".plyr-buttons-row")) {
+            const others = ctrls.querySelectorAll(
+              ":scope > .plyr__controls__item:not(.plyr__progress__container)"
+            );
 
-    // After initializing Plyr, restructure its controls
-    const ctrls = popupEl.closest('.plyr').querySelector('.plyr__controls');
-    if (ctrls) {
-      const progress = ctrls.querySelector('.plyr__progress__container');
-      const others = ctrls.querySelectorAll(':scope > .plyr__controls__item:not(.plyr__progress__container)');
+            const row = document.createElement("div");
+            row.classList.add("plyr-buttons-row");
+            row.style.display = "flex";
+            row.style.justifyContent = "center";
+            row.style.alignItems = "center";
+            row.style.gap = "0.5rem";
+            row.style.marginTop = "0.3rem";
 
-      if (!ctrls.querySelector('.plyr-buttons-row')) {
-        const row = document.createElement('div');
-        row.classList.add('plyr-buttons-row');
-        row.style.display = 'flex';
-        row.style.justifyContent = 'center';
-        row.style.alignItems = 'center';
-        row.style.gap = '0.5rem';
-        row.style.marginTop = '0.3rem';
+            others.forEach((el) => row.appendChild(el));
+            ctrls.appendChild(row);
+          }
+        }
+      });
 
-        others.forEach(el => row.appendChild(el));
-        ctrls.appendChild(row);
-      }
-    }
-  
-
-
-
-
-
-
+      marker.on("popupclose", (e) => {
+        const popupEl = e.popup.getElement().querySelector("audio.plyr");
+        if (popupEl && popupEl.plyr) {
+          popupEl.plyr.destroy();
         }
       });
 

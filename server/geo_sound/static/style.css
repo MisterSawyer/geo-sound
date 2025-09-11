@@ -255,6 +255,13 @@ form.upload button:active {
   color: #800 !important;
 }
 
+.leaflet-popup-content {
+  width: auto !important;
+  max-width: 90vw !important;   /* up to 90% of viewport width */
+  min-width: 200px;             /* don’t get too tiny */
+  box-sizing: border-box;
+}
+
 /* Round the Plyr audio player */
 .plyr {
   border-radius: 8px; /* adjust radius as you like */
