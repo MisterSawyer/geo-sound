@@ -240,6 +240,49 @@ form.upload button:active {
   font-weight: 600;
 }
 
+.track-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #3388ff !important;
+  transition: color 0.2s ease;
+  z-index: 2;
+}
+
+.rename-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.save-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #28a745;  /* green for confirm */
+  transition: color 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.save-btn:hover {
+  color: #218838;
+}
+
+.edit-input {
+  flex: 1; /* take all available space */
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 /* Delete button */
 .delete-btn {
   background: none;

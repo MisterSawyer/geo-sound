@@ -7,19 +7,26 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
     />
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='favicon.png') }}"
+    />
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   </head>
   <body>
-
-<div class="header-bar">
-    <button id="burger" class="burger-btn">☰</button>
-    <h1 class="app-title">Geo Sound</h1>
+    <div class="header-bar">
+      <button id="burger" class="burger-btn">☰</button>
+      <h1 class="app-title">Geo Sound</h1>
       <button id="add-btn" class="add-btn">＋</button>
-  </div>
+    </div>
 
     <div class="container">
       <!-- LEFT COLUMN -->
@@ -33,37 +40,67 @@
           data-lon="{{ track.metadata.lon }}"
         >
           <div class="track-header">
-            <h3 style="color: {{ track.metadata.color or '#000' }}">
+            <h3
+              id="title-{{ track.metadata.title or track.file }}"
+              style="color: {{ track.metadata.color or '#000' }}"
+            >
               {{ track.metadata.title or track.file }}
             </h3>
-            <!-- Delete button -->
-            <button
-              class="delete-btn"
-              onclick="deleteTrack('{{ track.metadata.title or track.file }}')"
-              title="Delete track"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 16 16"
+
+            <div class="track-actions">
+              <!-- Edit button -->
+              <button
+                class="edit-btn"
+                onclick="toggleRename('{{ track.metadata.title or track.file }}')"
+                title="Rename track"
               >
-                <path
-                  d="M5.5 5.5a.5.5 0 0 1 .5.5v7a.5.5 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M12.146.146a.5.5 0 0 1 .708 0l3 
+                             3a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 
+                             0 0 1-.168.11l-5 2a.5.5 0 0 
+                             1-.65-.65l2-5a.5.5 0 0 
+                             1 .11-.168l9.5-9.5zM11.207 
+                             2L3 10.207V13h2.793L14 
+                             4.793 11.207 2z"
+                  />
+                </svg>
+              </button>
+              <!-- Delete button -->
+              <button
+                class="delete-btn"
+                onclick="deleteTrack('{{ track.metadata.title or track.file }}')"
+                title="Delete track"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M5.5 5.5a.5.5 0 0 1 .5.5v7a.5.5 
              0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 
              0 0 1 1 0v7a.5.5 0 0 1-1 0v-7zm3 .5a.5.5 
              0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"
-                />
-                <path
-                  fill-rule="evenodd"
-                  d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 
              0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 
              0 0 1 0-2h3a1 1 0 0 1 1-1h4a1 1 0 
              1 1 1 1h3a1 1 0 0 1 1 1z"
-                />
-              </svg>
-            </button>
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {% if track.metadata.owner %}
@@ -75,9 +112,12 @@
           </p>
           {% endif %}
 
-<audio class="plyr" controls>
-  <source src="{{ url_for('sound.serve_sound', filename=track.file) }}" type="audio/{{ track.file.split('.')[-1] }}" />
-</audio>
+          <audio class="plyr" controls>
+            <source
+              src="{{ url_for('sound.serve_sound', filename=track.file) }}"
+              type="audio/{{ track.file.split('.')[-1] }}"
+            />
+          </audio>
         </div>
         {% endfor %}
       </div>
@@ -87,22 +127,37 @@
         <div id="map"></div>
       </div>
 
-
-<!-- Hidden slide-down form -->
-<div id="add-form-panel" class="add-form-panel">
-  <form class="upload" enctype="multipart/form-data">
-    <h2>Add New Track</h2>
-    <input type="file" name="sound" accept="{{ config.FILE_ACCEPT }}" required />
-    <input type="text" name="name" placeholder="Track Name" required />
-    <input type="text" name="owner" placeholder="Your Name" />
-    <input type="number" step="any" name="lat" placeholder="Latitude" required />
-    <input type="number" step="any" name="lon" placeholder="Longitude" required />
-    <label for="color">Pin Color:</label>
-    <input type="color" name="color" id="color" value="#3388ff" />
-    <button type="submit">Upload</button>
-  </form>
-</div>
-
+      <!-- Hidden slide-down form -->
+      <div id="add-form-panel" class="add-form-panel">
+        <form class="upload" enctype="multipart/form-data">
+          <h2>Add New Track</h2>
+          <input
+            type="file"
+            name="sound"
+            accept="{{ config.FILE_ACCEPT }}"
+            required
+          />
+          <input type="text" name="name" placeholder="Track Name" required />
+          <input type="text" name="owner" placeholder="Your Name" />
+          <input
+            type="number"
+            step="any"
+            name="lat"
+            placeholder="Latitude"
+            required
+          />
+          <input
+            type="number"
+            step="any"
+            name="lon"
+            placeholder="Longitude"
+            required
+          />
+          <label for="color">Pin Color:</label>
+          <input type="color" name="color" id="color" value="#3388ff" />
+          <button type="submit">Upload</button>
+        </form>
+      </div>
     </div>
 
     <!-- Leaflet JS -->
@@ -114,6 +169,7 @@
       window.BASE_AUDIO_URL = "{{ url_for('sound.serve_sound', filename='') }}";
       window.BASE_API_UPLOAD_URL = "{{ url_for('api.upload') }}";
       window.BASE_API_DELETE_URL = "{{ url_for('api.delete', name='__NAME__') }}";
+      window.BASE_API_RENAME_URL = "{{ url_for('api.rename', old_name='__OLD__') }}";
       window.TRACKS = {{ tracks|tojson }};
       window.MARKERS = {}
     </script>
@@ -121,7 +177,6 @@
     <script src="{{ url_for('static', filename='map.js') }}"></script>
     <script src="{{ url_for('static', filename='tracks.js') }}"></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-        <script src="{{ url_for('static', filename='player.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='player.js') }}"></script>
   </body>
 </html>

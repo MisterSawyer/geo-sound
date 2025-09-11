@@ -94,7 +94,6 @@ def delete_track(name: str):
     deleted = []
 
     # Try all allowed extensions for the sound file
-    # Try all allowed extensions for the sound file
     for ext in current_app.config["ALLOWED_EXTENSIONS"]:
         sound_filename = secure_filename(f"{name}.{ext}")
         sound_path = os.path.join(sounds_dir, sound_filename)
@@ -113,3 +112,53 @@ def delete_track(name: str):
         return None, {"error": f"No track found with name '{name}'"}
 
     return {"message": f"Deleted track '{name}'", "deleted": deleted}, None
+
+
+def rename_track(old_name: str, new_name : str):
+    """
+    Rename a track and update its metadata 'title'.
+    """
+
+    sounds_dir = current_app.config["SOUNDS_DIR"]
+    metadata_dir = current_app.config["METADATA_DIR"]
+
+    old_name = secure_filename(old_name)
+    new_name = secure_filename(new_name)
+    extension = ""
+    
+    for ext in current_app.config["ALLOWED_EXTENSIONS"]:
+        sound_path = os.path.join(sounds_dir, secure_filename(f"{old_name}.{ext}"))
+        if os.path.exists(sound_path):
+            extension = ext
+
+    # Old and new filenames
+    old_sound = os.path.join(sounds_dir, secure_filename(f"{old_name}.{extension}"))
+    new_sound = os.path.join(sounds_dir, secure_filename(f"{new_name}.{extension}"))
+
+    old_metadata = os.path.join(metadata_dir, secure_filename(f"{old_name}.json"))
+    new_metadata = os.path.join(metadata_dir, secure_filename(f"{new_name}.json"))
+
+    # Check if track exists
+    if not os.path.exists(old_sound) or not os.path.exists(old_metadata):
+        return None, {"error": f"Track '{old_name}' not found"}
+
+    # Prevent overwriting an existing track
+    if os.path.exists(new_sound) or os.path.exists(new_metadata):
+        return None, {"error": f"Track '{new_name}' already exists"}
+
+    try:
+        os.rename(old_sound, new_sound)
+        os.rename(old_metadata, new_metadata)
+
+        # Update metadata title
+        with open(new_metadata, "r+", encoding="utf-8") as jf:
+            metadata = json.load(jf)
+            metadata["title"] = new_name
+            jf.seek(0)
+            json.dump(metadata, jf, indent=2)
+            jf.truncate()
+
+    except Exception as e:
+        return None, {"error": f"Rename failed {str(e)}"}
+
+    return {"message": f"Renamed track '{old_name}' to: {new_name}"}, None
