@@ -142,6 +142,18 @@ h2 {
   transition: top 0.4s ease, opacity 0.3s ease;
 }
 
+.color-picker {
+  background: none;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+
+  border-color: #3388ff;
+  box-shadow: 0 0 0 2px rgba(51, 136, 255, 0.2);
+  outline: none;
+}
+
 form.upload {
   display: flex;
   flex-direction: column;
@@ -262,6 +274,7 @@ form.upload button:active {
 }
 
 .save-btn {
+    display: flex;
   background: none;
   border: none;
   cursor: pointer;
@@ -269,6 +282,10 @@ form.upload button:active {
   color: #28a745;  /* green for confirm */
   transition: color 0.2s ease;
   margin-left: 0.5rem;
+    padding: 0;
+    height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .save-btn:hover {

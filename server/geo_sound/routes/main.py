@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, send_from_directory, current_app
-from geo_sound.services.sound_service import load_tracks
+from geo_sound.services.track_service import load_tracks
 
 main_bp = Blueprint("main", __name__)
 

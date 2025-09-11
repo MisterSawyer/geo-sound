@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, redirect, url_for
-from geo_sound.services.sound_service import save_track, delete_track, rename_track
+from geo_sound.services.track_service import save_track, delete_track, rename_track, change_track_color
 
 api_bp = Blueprint("api", __name__)
 
@@ -25,6 +25,18 @@ def rename(old_name : str):
         return jsonify({"error": "Missing 'new_name' in request"}), 400
 
     result, error = rename_track(old_name, data["new_name"])
+    if error:
+        return jsonify(error), 404
+    return jsonify(result), 200
+
+
+@api_bp.route("/color/<string:name>", methods=["PUT"])
+def update_color(name: str):
+    data = request.get_json(silent=True)
+    if not data or "color" not in data:
+        return jsonify({"error": "Missing 'color' in request"}), 400
+
+    result, error = change_track_color(name, data["color"])
     if error:
         return jsonify(error), 404
     return jsonify(result), 200

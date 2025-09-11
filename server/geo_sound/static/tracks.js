@@ -67,8 +67,6 @@ async function renameTrack(oldName, newName) {
 
     if (response.ok) {
       console.log("Renamed successfully:", data);
-      // Reload page so UI updates
-      window.location.reload();
     } else {
       alert(data.error || "Failed to rename track");
     }
@@ -78,33 +76,68 @@ async function renameTrack(oldName, newName) {
   }
 }
 
-function toggleRename(trackName) {
+async function changeColor(name, color) {
+  const url = window.BASE_API_COLOR_URL.replace(
+    "__NAME__",
+    encodeURIComponent(name)
+  );
+
+  try {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ color }),
+    });
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("Color changed successfully:", data);
+    } else {
+      alert(data.error || "Failed to update color");
+    }
+  } catch (err) {
+    console.error("Color update failed:", err);
+    alert("Error updating color");
+  }
+}
+
+// Keep references to active listeners per track
+const editListeners = {};
+
+function toggleEdit(trackName) {
   const trackEl = document.getElementById(`track-${trackName}`);
   const titleEl = document.getElementById(`title-${trackName}`);
-  const actionBtns = trackEl.querySelectorAll(".track-actions button");
-  if (!titleEl || !trackEl) return;
 
+  const actionsEl = trackEl.querySelector(".track-actions");
+
+  if (!titleEl || !trackEl || !actionsEl) return;
+
+  const originalColor = trackEl.dataset.color || "#3388ff";
+  console.log(originalColor);
   // Already editing → cancel
   const input = titleEl.querySelector(".edit-input");
   if (input) {
-    // Restore original text
-    titleEl.textContent = input.dataset.original;
-
-    // Show action buttons again
-    actionBtns.forEach((btn) => (btn.style.display = "inline-flex"));
+    cancelEdit(trackName, originalColor);
     return;
   }
-
-  const originalText = titleEl.textContent.trim();
 
   // Replace with inline input + save button
   titleEl.innerHTML = `
   <div class="rename-inline">
     <input type="text" class="edit-input"
            id="rename-input-${trackName}"
-           value="${originalText}"
-           data-original="${originalText}" />
-    <button class="save-btn" onclick="confirmRename('${trackName}')" title="Save">
+           value="${trackName}"
+           data-original="${trackName}" />
+
+      <input type="color" class="color-picker"
+            id="edit-color-${trackName}"
+             value="${originalColor}"
+            >
+
+   <button class="save-btn"
+        data-track="${trackName}"
+        data-color="${originalColor}"
+        title="Save">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
            viewBox="0 0 122.73 122.88" fill="currentColor">
         <path d="M109.5,113.68L109.5,113.68l-6.09,0c-0.4,0-0.73-0.32-0.73-0.72V69.48l0-0.1
@@ -136,53 +169,79 @@ function toggleRename(trackName) {
     </button>
   </div>
 `;
-
   // Hide all action buttons while editing
-  actionBtns.forEach((btn) => (btn.style.display = "none"));
+  actionsEl.style.display = "none"; // hide Edit/Delete buttons
 
   const inputEl = document.getElementById(`rename-input-${trackName}`);
   inputEl.focus();
 
-  // Save with Enter, cancel with Escape
-  inputEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      confirmRename(trackName);
-    } else if (e.key === "Escape") {
-      titleEl.textContent = originalText;
-      actionBtns.forEach((btn) => (btn.style.display = "inline-flex"));
-    }
-  });
+  // ----- Setup event listeners -----
+  const handleSave = async (e) => {
+    if (e.target.closest(".save-btn")) {
+      const btn = e.target.closest(".save-btn");
+      const tn = btn.dataset.track;
+      const oldColor = btn.dataset.color;
 
-  // Cancel if clicking outside
-  function handleClickOutside(event) {
-    if (!trackEl.contains(event.target)) {
-      titleEl.textContent = originalText;
-      actionBtns.forEach((btn) => (btn.style.display = "inline-flex"));
-      document.removeEventListener("click", handleClickOutside);
+      await confirmEdit(tn, oldColor);
+      removeListeners(trackName); // cleanup after saving
     }
-  }
-  setTimeout(() => {
-    document.addEventListener("click", handleClickOutside);
-  }, 0);
+  };
+
+  const handleClickOutside = (event) => {
+    if (!trackEl.contains(event.target)) {
+      cancelEdit(trackName, originalColor);
+      removeListeners(trackName); // cleanup after cancel
+    }
+  };
+
+  document.addEventListener("click", handleSave);
+  document.addEventListener("click", handleClickOutside);
+
+  // store refs so we can remove them later
+  editListeners[trackName] = { handleSave, handleClickOutside };
 }
 
-async function confirmRename(oldName) {
-  const input = document.getElementById(`rename-input-${oldName}`);
-  const trackEl = document.getElementById(`track-${oldName}`);
-  const actionBtns = trackEl.querySelectorAll(".track-actions button");
-  if (!input) return;
+function removeListeners(trackName) {
+  const refs = editListeners[trackName];
+  if (!refs) return;
+  document.removeEventListener("click", refs.handleSave);
+  document.removeEventListener("click", refs.handleClickOutside);
+  delete editListeners[trackName];
+}
 
-  const newName = input.value.trim();
-  const original = input.dataset.original;
+async function confirmEdit(oldName, oldColor) {
+  const nameInput = document.getElementById(`rename-input-${oldName}`);
+  const colorInput = document.getElementById(`edit-color-${oldName}`);
+  if (!nameInput || !colorInput) return;
 
-  if (!newName || newName === original) {
-    const titleEl = document.getElementById(`title-${oldName}`);
-    if (titleEl) titleEl.textContent = original;
-    actionBtns.forEach((btn) => (btn.style.display = "inline-flex"));
-    return;
+  const newName = nameInput.value.trim();
+  const newColor = colorInput.value;
+
+  shouldReload = false;
+  if (newColor && newColor != oldColor) {
+    await changeColor(oldName, newColor);
+    shouldReload = true;
   }
 
-  await renameTrack(oldName, newName);
+  if (newName && newName != oldName) {
+    await renameTrack(oldName, newName);
+    shouldReload = true;
+  }
+
+  // Reload page so UI updates
+  if (shouldReload) {
+    window.location.reload();
+  }
+}
+
+function cancelEdit(originalName, originalColor) {
+  const trackEl = document.getElementById(`track-${originalName}`);
+  const titleEl = trackEl.querySelector(".track-header h3");
+  const actionsEl = trackEl.querySelector(".track-actions");
+
+  titleEl.textContent = originalName;
+  titleEl.style.color = originalColor;
+  actionsEl.style.display = "flex";
 }
 
 document.querySelectorAll(".track").forEach((trackEl) => {

@@ -38,6 +38,7 @@
           id="track-{{ track.metadata.title or track.file }}"
           data-lat="{{ track.metadata.lat }}"
           data-lon="{{ track.metadata.lon }}"
+          data-color="{{ track.metadata.color or '#3388ff' }}"
         >
           <div class="track-header">
             <h3
@@ -51,7 +52,7 @@
               <!-- Edit button -->
               <button
                 class="edit-btn"
-                onclick="toggleRename('{{ track.metadata.title or track.file }}')"
+                onclick="toggleEdit('{{ track.metadata.title or track.file }}')"
                 title="Rename track"
               >
                 <svg
@@ -170,6 +171,8 @@
       window.BASE_API_UPLOAD_URL = "{{ url_for('api.upload') }}";
       window.BASE_API_DELETE_URL = "{{ url_for('api.delete', name='__NAME__') }}";
       window.BASE_API_RENAME_URL = "{{ url_for('api.rename', old_name='__OLD__') }}";
+      window.BASE_API_COLOR_URL = "{{ url_for('api.update_color', name='__NAME__') }}";
+
       window.TRACKS = {{ tracks|tojson }};
       window.MARKERS = {}
     </script>
