@@ -109,7 +109,7 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <!-- Map config -->
     <script>
-      window.MAP = L.map('map', { maxZoom: 20}).setView([20, 0], 2);
+      window.MAP = L.map('map', { maxZoom: 20, zoomControl: false}).setView([20, 0], 2);
       window.BOUNDS = L.latLngBounds([]);
       window.BASE_AUDIO_URL = "{{ url_for('sound.serve_sound', filename='') }}";
       window.BASE_API_UPLOAD_URL = "{{ url_for('api.upload') }}";
