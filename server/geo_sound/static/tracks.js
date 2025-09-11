@@ -15,7 +15,7 @@ async function deleteTrack(name) {
     const data = await response.json();
 
     if (response.ok) {
-        window.location.reload();
+      window.location.reload();
     } else {
       alert(data.error || "Failed to delete track");
     }
@@ -37,8 +37,8 @@ async function addTrack(formElement) {
     const data = await response.json();
 
     if (response.ok) {
-        window.location.reload();
-        alert("Track uploaded successfully!");
+      window.location.reload();
+      alert("Track uploaded successfully!");
     } else {
       alert(data.error || "Failed to upload track");
     }
@@ -48,8 +48,7 @@ async function addTrack(formElement) {
   }
 }
 
-
-document.querySelectorAll(".track").forEach(trackEl => {
+document.querySelectorAll(".track").forEach((trackEl) => {
   trackEl.addEventListener("click", () => {
     const lat = parseFloat(trackEl.dataset.lat);
     const lon = parseFloat(trackEl.dataset.lon);
@@ -59,7 +58,7 @@ document.querySelectorAll(".track").forEach(trackEl => {
       const marker = window.MARKERS[filename];
 
       if (marker) {
-        window.MAP.setView(marker.getLatLng(), 50, { animate: true });  // zoom in
+        window.MAP.setView(marker.getLatLng(), 50, { animate: true }); // zoom in
         marker.openPopup();
       } else {
         window.MAP.setView([lat, lon], 50, { animate: true });
@@ -87,17 +86,44 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const addBtn = document.getElementById("add-btn");
   const formPanel = document.getElementById("add-form-panel");
+  const latInput = formPanel.querySelector('input[name="lat"]');
+  const lonInput = formPanel.querySelector('input[name="lon"]');
 
   addBtn.addEventListener("click", () => {
     formPanel.classList.toggle("active");
+    if (formPanel.classList.contains("active")) {
+      // Panel is now open
+      updateMarkerFromInputs();
+    } else {
+      // Panel is now closed
+      if (window.hideAddTrackMarker) {
+        window.hideAddTrackMarker();
+      }
+    }
   });
 
+  // Update marker when user edits coordinates manually
+  function updateMarkerFromInputs() {
+    const lat = parseFloat(latInput.value);
+    const lon = parseFloat(lonInput.value);
+    if (!isNaN(lat) && !isNaN(lon) && window.showAddTrackMarker) {
+      window.showAddTrackMarker(lat, lon);
+    }
+  }
+
+  latInput.addEventListener("input", updateMarkerFromInputs);
+  lonInput.addEventListener("input", updateMarkerFromInputs);
+
   // Intercept form submit
-  formPanel.querySelector("form.upload").addEventListener("submit", e => {
+  formPanel.querySelector("form.upload").addEventListener("submit", (e) => {
     e.preventDefault();
     addTrack(e.target);
 
     // hide form after upload
     formPanel.classList.remove("active");
+
+    if (window.hideAddTrackMarker) {
+      window.hideAddTrackMarker();
+    }
   });
 });

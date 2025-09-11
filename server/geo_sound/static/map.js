@@ -1,3 +1,13 @@
+// Create a reusable marker (hidden by default)
+const addTrackMarker = L.circleMarker([0, 0], {
+  radius: 6,
+  color: "#666",
+  fillColor: "#999",
+  fillOpacity: 0.8
+}).addTo(window.MAP);
+
+addTrackMarker.setStyle({ opacity: 0, fillOpacity: 0 }); // start hidden
+
 document.addEventListener("DOMContentLoaded", function () {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap contributors",
@@ -49,3 +59,42 @@ document.addEventListener("DOMContentLoaded", function () {
     window.MAP.fitBounds(window.BOUNDS.pad(0.2));
   }
 });
+
+// Helper to update marker position and show it
+function showAddTrackMarker(lat, lon) {
+  addTrackMarker.setLatLng([lat, lon]);
+  addTrackMarker.setStyle({ opacity: 1, fillOpacity: 0.8 });
+}
+
+// Helper to hide marker
+function hideAddTrackMarker() {
+  addTrackMarker.setStyle({ opacity: 0, fillOpacity: 0 });
+}
+
+// Expose helpers globally so tracks.js can use them
+window.showAddTrackMarker = showAddTrackMarker;
+window.hideAddTrackMarker = hideAddTrackMarker;
+
+// Right-click handler on map
+window.MAP.on("contextmenu", function (e) {
+  // e.latlng contains {lat, lng}
+  const lat = e.latlng.lat.toFixed(6);
+  const lon = e.latlng.lng.toFixed(6);
+
+  // Open the add form panel
+  const formPanel = document.getElementById("add-form-panel");
+  formPanel.classList.add("active");
+
+  // Fill coordinates into form inputs
+  const latInput = formPanel.querySelector('input[name="lat"]');
+  const lonInput = formPanel.querySelector('input[name="lon"]');
+
+  if (latInput && lonInput) {
+    latInput.value = lat;
+    lonInput.value = lon;
+  }
+
+  showAddTrackMarker(lat, lon);
+
+});
+
