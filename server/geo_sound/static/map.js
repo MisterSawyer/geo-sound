@@ -11,6 +11,8 @@ addTrackMarker.setStyle({ opacity: 0, fillOpacity: 0 }); // start hidden
 document.addEventListener("DOMContentLoaded", function () {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap contributors",
+    maxZoom: 20,
+    maxNativeZoom: 19
   }).addTo(window.MAP);
 
   var tracks = window.TRACKS || [];
