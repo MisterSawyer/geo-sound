@@ -3,7 +3,7 @@ const addTrackMarker = L.circleMarker([0, 0], {
   radius: 6,
   color: "#666",
   fillColor: "#999",
-  fillOpacity: 0.8
+  fillOpacity: 0.8,
 }).addTo(window.MAP);
 
 addTrackMarker.setStyle({ opacity: 0, fillOpacity: 0 }); // start hidden
@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap contributors",
     maxZoom: 20,
-    maxNativeZoom: 19
+    maxNativeZoom: 19,
   }).addTo(window.MAP);
 
   var tracks = window.TRACKS || [];
@@ -42,13 +42,52 @@ document.addEventListener("DOMContentLoaded", function () {
       let popupContent = `
                 <b>${t.metadata.title || t.file}</b><br/>
                 ${t.metadata.owner || ""}<br/>
-                <audio controls style="width:200px;">
+                <audio class="plyr" controls>
                     <source src="${audioUrl}" type="${mime}">
                 </audio>
             `;
       let marker = L.marker([t.metadata.lat, t.metadata.lon], { icon })
         .addTo(window.MAP)
         .bindPopup(popupContent);
+
+      // Initialize Plyr when popup opens
+      marker.on("popupopen", () => {
+        const popupEl = document.querySelector(".leaflet-popup-content audio.plyr");
+        if (popupEl) {
+          new Plyr(popupEl, {
+            controls: ["play", "progress", "current-time", "duration"],
+            autoplay: false,
+          });
+
+
+    // After initializing Plyr, restructure its controls
+    const ctrls = popupEl.closest('.plyr').querySelector('.plyr__controls');
+    if (ctrls) {
+      const progress = ctrls.querySelector('.plyr__progress__container');
+      const others = ctrls.querySelectorAll(':scope > .plyr__controls__item:not(.plyr__progress__container)');
+
+      if (!ctrls.querySelector('.plyr-buttons-row')) {
+        const row = document.createElement('div');
+        row.classList.add('plyr-buttons-row');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'center';
+        row.style.alignItems = 'center';
+        row.style.gap = '0.5rem';
+        row.style.marginTop = '0.3rem';
+
+        others.forEach(el => row.appendChild(el));
+        ctrls.appendChild(row);
+      }
+    }
+  
+
+
+
+
+
+
+        }
+      });
 
       window.BOUNDS.extend(marker.getLatLng());
 
@@ -97,6 +136,4 @@ window.MAP.on("contextmenu", function (e) {
   }
 
   showAddTrackMarker(lat, lon);
-
 });
-

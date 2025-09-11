@@ -9,7 +9,7 @@
     />
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   </head>
@@ -75,12 +75,9 @@
           </p>
           {% endif %}
 
-          <audio controls>
-            <source
-              src="{{ url_for('sound.serve_sound', filename=track.file) }}"
-              type="audio/{{ track.file.split('.')[-1] }}"
-            />
-          </audio>
+<audio class="plyr" controls>
+  <source src="{{ url_for('sound.serve_sound', filename=track.file) }}" type="audio/{{ track.file.split('.')[-1] }}" />
+</audio>
         </div>
         {% endfor %}
       </div>
@@ -123,5 +120,8 @@
     <!-- Local JS -->
     <script src="{{ url_for('static', filename='map.js') }}"></script>
     <script src="{{ url_for('static', filename='tracks.js') }}"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+        <script src="{{ url_for('static', filename='player.js') }}"></script>
+
   </body>
 </html>

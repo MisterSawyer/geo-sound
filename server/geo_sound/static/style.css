@@ -1,3 +1,7 @@
+:root {
+  --plyr-color-main: #3388ff; /* match your map pin color */
+}
+
 body {
   margin: 0;
   font-family: sans-serif;
@@ -251,8 +255,33 @@ form.upload button:active {
   color: #800 !important;
 }
 
-audio {
+/* Round the Plyr audio player */
+.plyr {
+  border-radius: 8px; /* adjust radius as you like */
+}
+
+/* Parent grid: two rows */
+.plyr--audio .plyr__controls {
+  display: grid !important;
+  grid-template-rows: auto auto;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
   width: 100%;
-  margin-top: 0.5rem;
-  height: 64px;
+}
+
+/* Row 1 = progress bar, full width */
+.plyr--audio .plyr__progress__container {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  width: 100% !important;
+}
+.leaflet-popup-content .plyr__progress__container {
+  grid-row: 1;
+  grid-column: 1 / 4;
+  width: 100% !important;
+}
+
+/* Row 2 = buttons row */
+.plyr--audio .plyr__controls__item:not(.plyr__progress__container) {
+  grid-row: 2;
 }
