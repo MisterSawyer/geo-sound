@@ -57,6 +57,7 @@ h2 {
   height: 3.5rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 
   /* Frosted glass effect */
   background: rgba(255, 255, 255, 0.6); /* semi-transparent white */
@@ -92,7 +93,6 @@ h2 {
 
 /* Add button in header */
 .add-btn {
-  margin-left: auto; /* push it to right */
   background: #28a745;
   border: none;
   color: white;
@@ -105,6 +105,16 @@ h2 {
 
 .add-btn:hover {
   background: #218838;
+}
+
+.add-btn,
+#auth-btn {
+  margin-left: 0.5rem; /* small spacing between them */
+}
+
+.app-title {
+  flex: 1; /* title expands to take remaining space */
+  text-align: left; /* optional: center text */
 }
 
 /* Push main content below header */
@@ -351,4 +361,136 @@ form.upload button:active {
 /* Row 2 = buttons row */
 .plyr--audio .plyr__controls__item:not(.plyr__progress__container) {
   grid-row: 2;
+}
+
+
+
+/* Auth button in header */
+.auth-btn {
+    margin-left: auto;
+  background: #007bff;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.auth-btn:hover {
+  background: #0069d9;
+}
+
+/* Auth panel: hidden by default */
+.auth-panel {
+  position: absolute;
+  top: -100%;
+  right: 0;
+  width: 350px;
+  max-width: 90%;
+
+  text-align: center;
+  align-items: center;
+
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: #fff;
+    border: 1px solid #ddd;
+      border-radius: 8px;
+  visibility: hidden;
+  opacity: 0;
+  transition: top 0.4s ease, opacity 0.3s ease, visibility 0s linear 0.3s;
+  z-index: 2100;
+}
+
+/* Active (shown) */
+.auth-panel.active {
+  top: 3.5rem; /* just below header */
+  visibility: visible;
+  opacity: 1;
+  transition: top 0.4s ease, opacity 0.3s ease;
+}
+
+
+.auth-content {
+  padding: 0 0.5rem; /* horizontal breathing room */
+}
+
+.auth-panel h2 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.auth-panel input {
+  display: block;
+  width: calc(100% - 1rem); /* respect left/right padding */
+  margin: 0.5rem auto;       /* centers it inside */
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;    /* ensures padding doesn’t overflow */
+}
+
+.auth-panel button {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.auth-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.auth-buttons button:first-child {
+  background: #3388ff;
+  color: white;
+}
+
+.auth-buttons button:last-child {
+  background: #4caf50;
+  color: white;
+}
+
+.auth-content #auth-status {
+  margin: 0.5rem 0 0 0;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+
+.auth-logged-in {
+  display: none;
+}
+
+.auth-logged-in #auth-logged-in-status {
+  margin: 0.5rem 0 1rem 0;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+
+  color: #155724;              /* dark green text */
+  background-color: #d4edda;   /* light green background */
+  border: 1px solid #c3e6cb;   /* subtle green border */
+
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+#logout-btn {
+  background: #b92424;
+  color: white;
 }

@@ -26,6 +26,7 @@
       <button id="burger" class="burger-btn">☰</button>
       <h1 class="app-title">Geo Sound</h1>
       <button id="add-btn" class="add-btn">＋</button>
+      <button id="auth-btn" class="auth-btn">🔑</button>
     </div>
 
     <div class="container">
@@ -36,6 +37,7 @@
         <div
           class="track"
           id="track-{{ track.metadata.title or track.file }}"
+          data-owner = "{{ track.metadata.owner }}"
           data-lat="{{ track.metadata.lat }}"
           data-lon="{{ track.metadata.lon }}"
           data-color="{{ track.metadata.color or '#3388ff' }}"
@@ -128,7 +130,33 @@
         <div id="map"></div>
       </div>
 
-      <!-- Hidden slide-down form -->
+      <!-- Login form, Hidden slide-down form -->
+      <div class="auth-panel">
+        <div class="auth-content">
+        <h2>🔑 Login / Register</h2>
+        <form id="auth-form">
+          <input type="text" id="username" placeholder="Username" required />
+          <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+          />
+          <div class="auth-buttons">
+            <button type="button" onclick="login()">Login</button>
+            <button type="button" onclick="register()">Register</button>
+          </div>
+          <div id="auth-status"></div>
+        </form>
+        </div>
+        <div class = "auth-logged-in">
+        <div id="auth-logged-in-status"></div>
+        <button id="logout-btn" type="button" onclick="logout()">Logout</button>
+        </div>
+        </div>
+      </div>
+
+      <!-- Add Track, Hidden slide-down form -->
       <div id="add-form-panel" class="add-form-panel">
         <form class="upload" enctype="multipart/form-data">
           <h2>Add New Track</h2>
@@ -139,7 +167,6 @@
             required
           />
           <input type="text" name="name" placeholder="Track Name" required />
-          <input type="text" name="owner" placeholder="Your Name" />
           <input
             type="number"
             step="any"
@@ -173,6 +200,11 @@
       window.BASE_API_RENAME_URL = "{{ url_for('api.rename', old_name='__OLD__') }}";
       window.BASE_API_COLOR_URL = "{{ url_for('api.update_color', name='__NAME__') }}";
 
+       window.BASE_AUTH_REGISTER_URL = "{{ url_for('auth.register') }}";
+       window.BASE_AUTH_LOGIN_URL = "{{ url_for('auth.login') }}";
+       window.BASE_AUTH_ME_URL = "{{ url_for('auth.me') }}";
+       window.BASE_AUTH_LOGOUT_URL = "{{ url_for('auth.logout') }}";
+
       window.TRACKS = {{ tracks|tojson }};
       window.MARKERS = {}
     </script>
@@ -181,5 +213,6 @@
     <script src="{{ url_for('static', filename='tracks.js') }}"></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     <script src="{{ url_for('static', filename='player.js') }}"></script>
+    <script src="{{ url_for('static', filename='auth.js') }}"></script>
   </body>
 </html>

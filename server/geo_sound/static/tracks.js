@@ -1,6 +1,12 @@
-// Config placeholders (injected by Jinja from index.html)
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("auth_token");
+  return token
+    ? { ...extra, Authorization: `Bearer ${token}` }
+    : extra;
+}
+
+
 const BASE_AUDIO_URL = window.BASE_AUDIO_URL;
-const BASE_API_DELETE_URL = window.BASE_API_DELETE_URL;
 const TRACKS = window.TRACKS || [];
 
 async function deleteTrack(name) {
@@ -8,10 +14,13 @@ async function deleteTrack(name) {
     return;
   }
 
-  const url = BASE_API_DELETE_URL.replace("__NAME__", encodeURIComponent(name));
+  const url = window.BASE_API_DELETE_URL.replace("__NAME__", encodeURIComponent(name));
 
   try {
-    const response = await fetch(url, { method: "DELETE" });
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: authHeaders(),   // send token
+    });
     const data = await response.json();
 
     if (response.ok) {
@@ -29,8 +38,9 @@ async function addTrack(formElement) {
   const formData = new FormData(formElement);
 
   try {
-    const response = await fetch(BASE_API_UPLOAD_URL, {
+    const response = await fetch(window.BASE_API_UPLOAD_URL, {
       method: "POST",
+      headers: authHeaders(),   // send token
       body: formData,
     });
 
@@ -57,9 +67,7 @@ async function renameTrack(oldName, newName) {
   try {
     const response = await fetch(url, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ new_name: newName }),
     });
 
@@ -85,7 +93,7 @@ async function changeColor(name, color) {
   try {
     const response = await fetch(url, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ color }),
     });
     const data = await response.json();
@@ -285,20 +293,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const latInput = formPanel.querySelector('input[name="lat"]');
   const lonInput = formPanel.querySelector('input[name="lon"]');
 
-  addBtn.addEventListener("click", () => {
-    formPanel.classList.toggle("active");
-    if (formPanel.classList.contains("active")) {
-      // Panel is now open
-      updateMarkerFromInputs();
-    } else {
-      // Panel is now closed
-      if (window.hideAddTrackMarker) {
-        window.hideAddTrackMarker();
-      }
-    }
-  });
+  //
+  // --- Panel open/close helpers ---
+  //
+  function openAddPanel() {
+    formPanel.classList.add("active");
+    updateMarkerFromInputs();
+    document.addEventListener("click", handleClickOutside);
+  }
 
-  // Update marker when user edits coordinates manually
+  function closeAddPanel() {
+    formPanel.classList.remove("active");
+    if (window.hideAddTrackMarker) {
+      window.hideAddTrackMarker();
+    }
+    document.removeEventListener("click", handleClickOutside);
+  }
+
+  function toggleAddPanel() {
+    if (formPanel.classList.contains("active")) {
+      closeAddPanel();
+    } else {
+      // tell auth.js to close itself
+      document.dispatchEvent(new CustomEvent("panel:open", { detail: "add" }));
+      openAddPanel();
+    }
+  }
+
+  function handleClickOutside(e) {
+    if (!formPanel.contains(e.target) && e.target !== addBtn) {
+      closeAddPanel();
+    }
+  }
+
+  //
+  // --- Marker updating ---
+  //
   function updateMarkerFromInputs() {
     const lat = parseFloat(latInput.value);
     const lon = parseFloat(lonInput.value);
@@ -310,16 +340,27 @@ document.addEventListener("DOMContentLoaded", () => {
   latInput.addEventListener("input", updateMarkerFromInputs);
   lonInput.addEventListener("input", updateMarkerFromInputs);
 
-  // Intercept form submit
+  //
+  // --- Submit handling ---
+  //
   formPanel.querySelector("form.upload").addEventListener("submit", (e) => {
     e.preventDefault();
     addTrack(e.target);
 
-    // hide form after upload
-    formPanel.classList.remove("active");
+    closeAddPanel(); // close panel after upload
+  });
 
-    if (window.hideAddTrackMarker) {
-      window.hideAddTrackMarker();
+  //
+  // --- Button + mutual exclusion ---
+  //
+  addBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleAddPanel();
+  });
+
+  document.addEventListener("panel:open", (e) => {
+    if (e.detail !== "add") {
+      closeAddPanel();
     }
   });
 });

@@ -9,6 +9,16 @@ def allowed_file(filename: str) -> bool:
         and filename.rsplit(".", 1)[1].lower() in current_app.config["ALLOWED_EXTENSIONS"]
     )
 
+def get_track_metadata(name: str) -> dict:
+    metadata_dir = current_app.config["METADATA_DIR"]
+    metadata_path = os.path.join(metadata_dir, secure_filename(f"{name}.json"))
+
+    if not os.path.exists(metadata_path):
+        return {}
+
+    with open(metadata_path, "r", encoding="utf-8") as jf:
+        return json.load(jf)
+
 def load_tracks():
     sounds_dir = current_app.config["SOUNDS_DIR"]
     metadata_dir = current_app.config["METADATA_DIR"]
@@ -30,13 +40,12 @@ def load_tracks():
     return tracks
 
 
-def save_track(request):
+def save_track(request, owner):
     if "sound" not in request.files:
         return None, {"error": "Missing sound file"}
 
     sound_file = request.files["sound"]
     name = request.form.get("name")
-    owner = request.form.get("owner")
     lat = request.form.get("lat")
     lon = request.form.get("lon")
     color = request.form.get("color", "#3388ff")
