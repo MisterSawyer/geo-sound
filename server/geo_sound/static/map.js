@@ -104,11 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
 // Helper to update marker position and show it
 function showAddTrackMarker(lat, lon) 
 {
-//   if(window.MAX_BOUNDS.contains([lat, lon]) === false) {
-//     hideAddTrackMarker();
-//     return;
-//   }
-
   addTrackMarker.setLatLng([lat, lon]);
   addTrackMarker.setStyle({ opacity: 1, fillOpacity: 0.8 });
 }
@@ -131,10 +126,6 @@ window.MAP.on("contextmenu", function (e) {
   const lat = e.latlng.lat.toFixed(6);
   const lon = e.latlng.lng.toFixed(6);
 
-  if(window.MAX_BOUNDS.contains(e.latlng) == false) {
-    return;
-  }
-
   // Open the add form panel
   const formPanel = document.getElementById("add-form-panel");
   formPanel.classList.add("active");
@@ -150,37 +141,6 @@ window.MAP.on("contextmenu", function (e) {
 
   showAddTrackMarker(lat, lon);
 });
-
-
-//Draw shaded overlay outside allowed bounds
-// function addBoundsMask() {
-//   // Coordinates for "world rectangle"
-//   const world = [
-//     [-90, -180],
-//     [-90, 180],
-//     [90, 180],
-//     [90, -180]
-//   ];
-
-//   // Bounds corners
-//   const b = [
-//     [window.MAX_BOUNDS.getSouth(), window.MAX_BOUNDS.getWest()],
-//     [window.MAX_BOUNDS.getSouth(), window.MAX_BOUNDS.getEast()],
-//     [window.MAX_BOUNDS.getNorth(), window.MAX_BOUNDS.getEast()],
-//     [window.MAX_BOUNDS.getNorth(), window.MAX_BOUNDS.getWest()]
-//   ];
-
-//   // Polygon with hole: [outer ring, inner ring]
-//   const mask = L.polygon([world, b], {
-//     color: "#000",
-//     fillColor: "#000",
-//     fillOpacity: 0.5,   // how dark you want it
-//     stroke: false
-//   });
-
-//   mask.addTo(window.MAP);
-//   return mask;
-// }
 
 function addBoundsMask(map, maxBounds) {
   const world = [
@@ -220,5 +180,3 @@ function addBoundsMask(map, maxBounds) {
 
   return mask;
 }
-
-addBoundsMask(window.MAP, window.MAX_BOUNDS);

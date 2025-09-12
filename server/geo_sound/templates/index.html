@@ -194,15 +194,10 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <!-- Map config -->
     <script>
-      const southWest = L.latLng(52.23182007935817, 21.024071106065738);
-      const northEast = L.latLng(52.23905054862275, 21.0542777007148);
-      window.MAX_BOUNDS = L.latLngBounds(southWest, northEast);
-
       window.MAP = L.map('map', { 
-        minZoom: 15.5, maxZoom: 20, zoomSnap: 0.01,
-        wheelPxPerZoomLevel: 256, 
-        zoomControl: false, 
-        maxBounds: window.MAX_BOUNDS,  maxBoundsViscosity: 1.0,})
+        minZoom: 3, maxZoom: 20, zoomSnap: 0.25,
+        wheelPxPerZoomLevel: 60, 
+        zoomControl: false,})
     .setView([20, 0], 2);
       window.BOUNDS = L.latLngBounds([]);
       window.BASE_AUDIO_URL = "{{ url_for('sound.serve_sound', filename='') }}";

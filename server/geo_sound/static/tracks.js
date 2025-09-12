@@ -42,12 +42,6 @@ async function addTrack(formElement) {
   const lon = parseFloat(formData.get("lon"));
   const latlng = L.latLng(lat, lon);
 
-  // Check against map bounds
-  if (!window.MAX_BOUNDS.contains(latlng)) {
-    alert("❌ Coordinates are out of bounds. Please pick a valid location.");
-    return;
-  }
-
   try {
     const response = await fetch(window.BASE_API_UPLOAD_URL, {
       method: "POST",
