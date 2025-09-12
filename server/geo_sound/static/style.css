@@ -494,3 +494,14 @@ form.upload button:active {
   background: #b92424;
   color: white;
 }
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: left;
+  font: 0.6em sans-serif;
+  padding-left: 1rem;
+  z-index: 1000;
+}

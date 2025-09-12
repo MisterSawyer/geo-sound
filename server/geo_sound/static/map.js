@@ -102,7 +102,13 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Helper to update marker position and show it
-function showAddTrackMarker(lat, lon) {
+function showAddTrackMarker(lat, lon) 
+{
+//   if(window.MAX_BOUNDS.contains([lat, lon]) === false) {
+//     hideAddTrackMarker();
+//     return;
+//   }
+
   addTrackMarker.setLatLng([lat, lon]);
   addTrackMarker.setStyle({ opacity: 1, fillOpacity: 0.8 });
 }
@@ -118,9 +124,16 @@ window.hideAddTrackMarker = hideAddTrackMarker;
 
 // Right-click handler on map
 window.MAP.on("contextmenu", function (e) {
+
+    if(localStorage.getItem("auth_token") === null)return;
+
   // e.latlng contains {lat, lng}
   const lat = e.latlng.lat.toFixed(6);
   const lon = e.latlng.lng.toFixed(6);
+
+  if(window.MAX_BOUNDS.contains(e.latlng) == false) {
+    return;
+  }
 
   // Open the add form panel
   const formPanel = document.getElementById("add-form-panel");
@@ -137,3 +150,75 @@ window.MAP.on("contextmenu", function (e) {
 
   showAddTrackMarker(lat, lon);
 });
+
+
+//Draw shaded overlay outside allowed bounds
+// function addBoundsMask() {
+//   // Coordinates for "world rectangle"
+//   const world = [
+//     [-90, -180],
+//     [-90, 180],
+//     [90, 180],
+//     [90, -180]
+//   ];
+
+//   // Bounds corners
+//   const b = [
+//     [window.MAX_BOUNDS.getSouth(), window.MAX_BOUNDS.getWest()],
+//     [window.MAX_BOUNDS.getSouth(), window.MAX_BOUNDS.getEast()],
+//     [window.MAX_BOUNDS.getNorth(), window.MAX_BOUNDS.getEast()],
+//     [window.MAX_BOUNDS.getNorth(), window.MAX_BOUNDS.getWest()]
+//   ];
+
+//   // Polygon with hole: [outer ring, inner ring]
+//   const mask = L.polygon([world, b], {
+//     color: "#000",
+//     fillColor: "#000",
+//     fillOpacity: 0.5,   // how dark you want it
+//     stroke: false
+//   });
+
+//   mask.addTo(window.MAP);
+//   return mask;
+// }
+
+function addBoundsMask(map, maxBounds) {
+  const world = [
+    [-90, -180],
+    [-90, 180],
+    [90, 180],
+    [90, -180],
+  ];
+
+  function getInner() {
+    return [
+      [maxBounds.getSouth(), maxBounds.getWest()],
+      [maxBounds.getSouth(), maxBounds.getEast()],
+      [maxBounds.getNorth(), maxBounds.getEast()],
+      [maxBounds.getNorth(), maxBounds.getWest()],
+    ];
+  }
+
+  const mask = L.polygon([world, getInner()], {
+    color: "#000",
+    fillColor: "#000",
+    fillOpacity: 0.3,
+    stroke: true,
+    interactive: true,
+    pane: "overlayPane", // keep under popups/markers
+  }).addTo(map);
+
+  // --- Recompute mask hole during pan/zoom ---
+  function updateMask() {
+    console.log("updateMask");
+    const inner = getInner();
+    mask.setLatLngs([world, inner]);
+  }
+
+  map.on("move", updateMask);   // fires continuously during panning
+  map.on("zoom", updateMask);   // fires during zoom animation
+
+  return mask;
+}
+
+addBoundsMask(window.MAP, window.MAX_BOUNDS);

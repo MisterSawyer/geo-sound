@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Geo Sound</title>
+    <title>Sounds of Poniat</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
@@ -24,7 +24,7 @@
   <body>
     <div class="header-bar">
       <button id="burger" class="burger-btn">☰</button>
-      <h1 class="app-title">Geo Sound</h1>
+      <h1 class="app-title">Sounds of Poniat</h1>
       <button id="add-btn" class="add-btn">＋</button>
       <button id="auth-btn" class="auth-btn">🔑</button>
     </div>
@@ -188,11 +188,22 @@
       </div>
     </div>
 
+    <p class="footer"> Made by Sawyer </p>
+
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <!-- Map config -->
     <script>
-      window.MAP = L.map('map', { maxZoom: 20, zoomControl: false}).setView([20, 0], 2);
+      const southWest = L.latLng(52.23182007935817, 21.024071106065738);
+      const northEast = L.latLng(52.23905054862275, 21.0542777007148);
+      window.MAX_BOUNDS = L.latLngBounds(southWest, northEast);
+
+      window.MAP = L.map('map', { 
+        minZoom: 15.5, maxZoom: 20, zoomSnap: 0.01,
+        wheelPxPerZoomLevel: 256, 
+        zoomControl: false, 
+        maxBounds: window.MAX_BOUNDS,  maxBoundsViscosity: 1.0,})
+    .setView([20, 0], 2);
       window.BOUNDS = L.latLngBounds([]);
       window.BASE_AUDIO_URL = "{{ url_for('sound.serve_sound', filename='') }}";
       window.BASE_API_UPLOAD_URL = "{{ url_for('api.upload') }}";
