@@ -197,3 +197,36 @@ def change_track_color(name: str, new_color: str):
         return None, {"error": f"Could not save metadata: {e}"}
 
     return {"message": f"Color updated for '{name}'", "color": new_color}, None
+
+def change_track_location(name: str, new_lat: float, new_lon: float):
+    """Update track metadata latitude/longitude."""
+    metadata_dir = current_app.config["METADATA_DIR"]
+    metadata_filename = secure_filename(name + ".json")
+    metadata_path = os.path.join(metadata_dir, metadata_filename)
+
+    if not os.path.exists(metadata_path):
+        return None, {"error": f"No metadata found for track '{name}'"}
+
+    try:
+        with open(metadata_path, "r", encoding="utf-8") as jf:
+            metadata = json.load(jf)
+    except Exception as e:
+        return None, {"error": f"Could not load metadata: {e}"}
+
+    try:
+        metadata["lat"] = float(new_lat)
+        metadata["lon"] = float(new_lon)
+    except ValueError:
+        return None, {"error": "Latitude and longitude must be numbers"}
+
+    try:
+        with open(metadata_path, "w", encoding="utf-8") as jf:
+            json.dump(metadata, jf, indent=2)
+    except Exception as e:
+        return None, {"error": f"Could not save metadata: {e}"}
+
+    return {
+        "message": f"Location updated for '{name}'",
+        "lat": metadata["lat"],
+        "lon": metadata["lon"]
+    }, None

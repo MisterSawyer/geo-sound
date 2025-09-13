@@ -1,9 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const players = Array.from(document.querySelectorAll('.plyr')).map(p => new Plyr(p, {
-    controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume'],
-    autoplay: false
-  }));
-  window.PLAYERS = players;
+  window.PLAYERS = {};
+  document.querySelectorAll('.track audio.plyr').forEach(el => {
+    const player = new Plyr(el, {
+      controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume'],
+    });
+    const name = el.closest('.track').id.replace("track-", "");
+    window.PLAYERS[name] = player;
+  });
 });
 
 document.addEventListener("DOMContentLoaded", () => {

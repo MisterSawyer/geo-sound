@@ -243,6 +243,7 @@ form.upload button:active {
   transition: background 0.2s, box-shadow 0.2s;
 }
 
+.track.active,
 .track:hover {
   background: #c2e9ff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -277,23 +278,25 @@ form.upload button:active {
   z-index: 2;
 }
 
-.rename-inline {
+.editor-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 0.4rem;
 }
 
 .save-btn {
-    display: flex;
+  flex: 1;
+  display: flex;
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
-  color: #28a745;  /* green for confirm */
+  color: #28a745; /* green for confirm */
   transition: color 0.2s ease;
-  margin-left: 0.5rem;
-    padding: 0;
-    height: 100%;
+  /* margin-left: 0.5rem; */
+  padding: 0;
+  height: 100%;
   align-items: center;
   justify-content: center;
 }
@@ -327,8 +330,8 @@ form.upload button:active {
 
 .leaflet-popup-content {
   width: auto !important;
-  max-width: 90vw !important;   /* up to 90% of viewport width */
-  min-width: 200px;             /* don’t get too tiny */
+  max-width: 90vw !important; /* up to 90% of viewport width */
+  min-width: 200px; /* don’t get too tiny */
   box-sizing: border-box;
 }
 
@@ -364,10 +367,48 @@ form.upload button:active {
 }
 
 
+.popup-player {
+  display: flex;
+  flex-direction: row;       /* row layout */
+  align-items: center;       /* vertically align center */
+  gap: 0.5rem;               /* space between elements */
+  width: 100%;
+}
+
+.popup-player .popup-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #666;             /* gray icon */
+  transition: color 0.2s, background 0.2s;
+}
+
+.popup-player .popup-toggle:hover
+{
+  background: #3388ff;        /* blue background */
+  color: white;               /* white icon */
+  outline: none;
+}
+
+.popup-player .popup-progress {
+  flex: 1;                   /* take remaining space */
+}
+
+.popup-player .popup-time {
+  font-size: 0.8rem;
+  white-space: nowrap;       /* prevent line break */
+}
 
 /* Auth button in header */
 .auth-btn {
-    margin-left: auto;
+  margin-left: auto;
   background: #007bff;
   border: none;
   color: white;
@@ -396,8 +437,8 @@ form.upload button:active {
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   background: #fff;
-    border: 1px solid #ddd;
-      border-radius: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   visibility: hidden;
   opacity: 0;
   transition: top 0.4s ease, opacity 0.3s ease, visibility 0s linear 0.3s;
@@ -412,7 +453,6 @@ form.upload button:active {
   transition: top 0.4s ease, opacity 0.3s ease;
 }
 
-
 .auth-content {
   padding: 0 0.5rem; /* horizontal breathing room */
 }
@@ -425,11 +465,11 @@ form.upload button:active {
 .auth-panel input {
   display: block;
   width: calc(100% - 1rem); /* respect left/right padding */
-  margin: 0.5rem auto;       /* centers it inside */
+  margin: 0.5rem auto; /* centers it inside */
   padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  box-sizing: border-box;    /* ensures padding doesn’t overflow */
+  box-sizing: border-box; /* ensures padding doesn’t overflow */
 }
 
 .auth-panel button {
@@ -466,9 +506,8 @@ form.upload button:active {
   font-weight: 600;
   text-align: center;
 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
-
 
 .auth-logged-in {
   display: none;
@@ -483,11 +522,11 @@ form.upload button:active {
   font-weight: 600;
   text-align: center;
 
-  color: #155724;              /* dark green text */
-  background-color: #d4edda;   /* light green background */
-  border: 1px solid #c3e6cb;   /* subtle green border */
+  color: #155724; /* dark green text */
+  background-color: #d4edda; /* light green background */
+  border: 1px solid #c3e6cb; /* subtle green border */
 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 #logout-btn {

@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify, redirect, url_for
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from geo_sound.services.track_service import get_track_metadata, save_track, delete_track, rename_track, change_track_color
+from geo_sound.services.track_service import (
+    get_track_metadata, save_track, delete_track, rename_track,
+    change_track_color, change_track_location
+)
 
 api_bp = Blueprint("api", __name__)
 
@@ -70,4 +73,24 @@ def update_color(name: str):
     result, error = change_track_color(name, data["color"])
     if error:
         return jsonify(error), 404
+    return jsonify(result), 200
+
+@api_bp.route("/location/<string:name>", methods=["PUT"])
+@jwt_required()
+def update_location(name: str):
+    username = get_jwt_identity()
+    data = request.get_json(silent=True)
+    if not data or "lat" not in data or "lon" not in data:
+        return jsonify({"error": "Missing 'lat' or 'lon' in request"}), 400
+
+    metadata = get_track_metadata(name)
+    if metadata == {}:
+        return jsonify({"error": "Track not found"}), 404
+
+    if metadata.get("owner") != username:
+        return jsonify({"error": "Not authorized to change location"}), 403
+
+    result, error = change_track_location(name, data["lat"], data["lon"])
+    if error:
+        return jsonify(error), 400
     return jsonify(result), 200

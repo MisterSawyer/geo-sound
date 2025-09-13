@@ -36,25 +36,24 @@
         {% for track in tracks %}
         <div
           class="track"
-          id="track-{{ track.metadata.title or track.file }}"
+          id="track-{{ track.metadata.title }}"
           data-owner = "{{ track.metadata.owner }}"
           data-lat="{{ track.metadata.lat }}"
           data-lon="{{ track.metadata.lon }}"
           data-color="{{ track.metadata.color or '#3388ff' }}"
         >
           <div class="track-header">
-            <h3
-              id="title-{{ track.metadata.title or track.file }}"
-              style="color: {{ track.metadata.color or '#000' }}"
-            >
-              {{ track.metadata.title or track.file }}
+            <div class = "track-title"> 
+            <h3 style="color: {{ track.metadata.color or '#000' }}">
+              {{ track.metadata.title }}
             </h3>
+            </div>
 
             <div class="track-actions">
               <!-- Edit button -->
               <button
                 class="edit-btn"
-                onclick="toggleEdit('{{ track.metadata.title or track.file }}')"
+                onclick="event.stopPropagation(); toggleEdit('{{ track.metadata.title }}')"
                 title="Rename track"
               >
                 <svg
@@ -78,7 +77,7 @@
               <!-- Delete button -->
               <button
                 class="delete-btn"
-                onclick="deleteTrack('{{ track.metadata.title or track.file }}')"
+                onclick="deleteTrack('{{ track.metadata.title }}')"
                 title="Delete track"
               >
                 <svg
@@ -109,10 +108,11 @@
           {% if track.metadata.owner %}
           <p><strong>Owner:</strong> {{ track.metadata.owner }}</p>
           {% endif %} {% if track.metadata.lat and track.metadata.lon %}
-          <p>
-            <strong>Coordinates:</strong> {{ track.metadata.lat }}, {{
-            track.metadata.lon }}
-          </p>
+            <p class="track-coords">
+              <strong>Coordinates:</strong>
+              <span class="coords-lat">{{ track.metadata.lat }}</span>,
+              <span class="coords-lon">{{ track.metadata.lon }}</span>
+            </p>
           {% endif %}
 
           <audio class="plyr" controls>
@@ -205,6 +205,7 @@
       window.BASE_API_DELETE_URL = "{{ url_for('api.delete', name='__NAME__') }}";
       window.BASE_API_RENAME_URL = "{{ url_for('api.rename', old_name='__OLD__') }}";
       window.BASE_API_COLOR_URL = "{{ url_for('api.update_color', name='__NAME__') }}";
+      window.BASE_API_LOCATION_URL = "{{ url_for('api.update_location', name='__NAME__') }}";
 
        window.BASE_AUTH_REGISTER_URL = "{{ url_for('auth.register') }}";
        window.BASE_AUTH_LOGIN_URL = "{{ url_for('auth.login') }}";
@@ -217,8 +218,10 @@
     <!-- Local JS -->
     <script src="{{ url_for('static', filename='map.js') }}"></script>
     <script src="{{ url_for('static', filename='tracks.js') }}"></script>
+    <script src="{{ url_for('static', filename='tracks-upload-panel.js') }}"></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     <script src="{{ url_for('static', filename='player.js') }}"></script>
     <script src="{{ url_for('static', filename='auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='auth-panel.js') }}"></script>
   </body>
 </html>

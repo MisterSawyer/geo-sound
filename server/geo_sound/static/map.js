@@ -34,65 +34,112 @@ document.addEventListener("DOMContentLoaded", function () {
         popupAnchor: [0, -36],
       });
 
-      let audioUrl = window.BASE_AUDIO_URL + t.file;
+    const playIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="32" height="32">
+        <path d="M6 4.5v9l7-4.5-7-4.5z" fill="currentColor"/>
+      </svg>`;
+    const pauseIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="32" height="32">
+        <path d="M6 4h2v10H6zm4 0h2v10h-2z" fill="currentColor"/>
+      </svg>`;
 
-      const ext = t.file.split(".").pop().toLowerCase();
-      let mime = `audio/${ext}`;
+      const popupDiv = document.createElement("div");
+      popupDiv.innerHTML = `
+        <b>${t.metadata.title}</b><br/>
+        ${t.metadata.owner || ""}<br/>
+        <div class="popup-player" data-track="${t.metadata.title}">
+            <button class="popup-toggle">▶</button>
+            <input type="range" class="popup-progress" min="0" max="100" step="0.1" value="0">
+            <span class="popup-time">0:00 / 0:00</span>
+        </div>
+        `;
 
-      let popupContent = `
-                <b>${t.metadata.title || t.file}</b><br/>
-                ${t.metadata.owner || ""}<br/>
-                <audio class="plyr" controls>
-                    <source src="${audioUrl}" type="${mime}">
-                </audio>
-            `;
       let marker = L.marker([t.metadata.lat, t.metadata.lon], { icon })
         .addTo(window.MAP)
-        .bindPopup(popupContent);
+        .bindPopup(popupDiv);
 
-      // Initialize Plyr when popup opens
       marker.on("popupopen", (e) => {
-        const popupEl = e.popup.getElement().querySelector("audio.plyr");
-        if (popupEl) {
-          const player = new Plyr(popupEl, {
-            controls: ["play", "progress", "current-time", "duration"],
-            autoplay: false,
-          });
+        // Remove active from all tracks
+        document
+          .querySelectorAll(".track")
+          .forEach((el) => el.classList.remove("active"));
 
-          // After initializing Plyr, restructure its controls
-          const ctrls = popupEl
-            .closest(".plyr")
-            .querySelector(".plyr__controls");
-          if (ctrls && !ctrls.querySelector(".plyr-buttons-row")) {
-            const others = ctrls.querySelectorAll(
-              ":scope > .plyr__controls__item:not(.plyr__progress__container)"
-            );
-
-            const row = document.createElement("div");
-            row.classList.add("plyr-buttons-row");
-            row.style.display = "flex";
-            row.style.justifyContent = "center";
-            row.style.alignItems = "center";
-            row.style.gap = "0.5rem";
-            row.style.marginTop = "0.3rem";
-
-            others.forEach((el) => row.appendChild(el));
-            ctrls.appendChild(row);
-          }
+        // Highlight the matching track
+        const trackEl = document.getElementById(`track-${t.metadata.title}`);
+        if (trackEl) {
+          trackEl.classList.add("active");
+          trackEl.scrollIntoView({ behavior: "smooth", block: "center" });
         }
+
+        const popupDiv = e.popup.getElement().querySelector(".popup-player");
+        if (!popupDiv) return;
+
+        const trackName = popupDiv.dataset.track;
+        const player = window.PLAYERS[trackName]; // Plyr instance in All Tracks
+        if (!player) return;
+
+        const toggleBtn = popupDiv.querySelector(".popup-toggle");
+        const slider = popupDiv.querySelector(".popup-progress");
+        const timeLabel = popupDiv.querySelector(".popup-time");
+
+        // --- Toggle play/pause ---
+        const updateToggleIcon = () => {
+          toggleBtn.innerHTML = player.playing ? pauseIcon : playIcon;
+        };
+
+        toggleBtn.onclick = () => {
+          if (player.playing) {
+            player.pause();
+          } else {
+            player.play();
+          }
+        };
+
+        // --- Update on player events ---
+        player.on("play", updateToggleIcon);
+        player.on("pause", updateToggleIcon);
+
+        player.on("timeupdate", () => {
+          if (!player.duration) return;
+          const percent = (player.currentTime / player.duration) * 100;
+          slider.value = percent || 0;
+
+          // Format mm:ss
+          const fmt = (sec) => {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60)
+              .toString()
+              .padStart(2, "0");
+            return `${m}:${s}`;
+          };
+          timeLabel.textContent = `${fmt(player.currentTime)} / ${fmt(
+            player.duration
+          )}`;
+        });
+
+        // --- Seek from popup slider ---
+        slider.addEventListener("input", () => {
+          if (player.duration) {
+            const time = (slider.value / 100) * player.duration;
+            player.currentTime = time;
+          }
+        });
+
+        // Init button state
+        updateToggleIcon();
       });
 
       marker.on("popupclose", (e) => {
-        const popupEl = e.popup.getElement().querySelector("audio.plyr");
-        if (popupEl && popupEl.plyr) {
-          popupEl.plyr.destroy();
+        const trackEl = document.getElementById(`track-${t.metadata.title}`);
+        if (trackEl) {
+          trackEl.classList.remove("active");
         }
       });
 
       window.BOUNDS.extend(marker.getLatLng());
 
-      // store marker by file (unique key)
-      window.MARKERS[t.file] = marker;
+      // store marker
+      window.MARKERS[t.metadata.title] = marker;
     }
   });
 
@@ -102,8 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Helper to update marker position and show it
-function showAddTrackMarker(lat, lon) 
-{
+function showAddTrackMarker(lat, lon) {
   addTrackMarker.setLatLng([lat, lon]);
   addTrackMarker.setStyle({ opacity: 1, fillOpacity: 0.8 });
 }
@@ -119,8 +165,7 @@ window.hideAddTrackMarker = hideAddTrackMarker;
 
 // Right-click handler on map
 window.MAP.on("contextmenu", function (e) {
-
-    if(localStorage.getItem("auth_token") === null)return;
+  if (localStorage.getItem("auth_token") === null) return;
 
   // e.latlng contains {lat, lng}
   const lat = e.latlng.lat.toFixed(6);
@@ -175,8 +220,8 @@ function addBoundsMask(map, maxBounds) {
     mask.setLatLngs([world, inner]);
   }
 
-  map.on("move", updateMask);   // fires continuously during panning
-  map.on("zoom", updateMask);   // fires during zoom animation
+  map.on("move", updateMask); // fires continuously during panning
+  map.on("zoom", updateMask); // fires during zoom animation
 
   return mask;
 }
