@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Sounds of Poniat</title>
+
+    <!-- Tailwind build -->
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
+      href="{{ url_for('static', filename='output.css') }}"
     />
+
     <link
       rel="icon"
       type="image/x-icon"
@@ -18,187 +21,310 @@
       href="{{ url_for('static', filename='favicon.png') }}"
     />
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   </head>
-  <body>
-    <div class="header-bar">
-      <button id="burger" class="burger-btn">☰</button>
-      <h1 class="app-title">Sounds of Poniat</h1>
-      <button id="add-btn" class="add-btn">＋</button>
-      <button id="auth-btn" class="auth-btn">🔑</button>
+  <body class="bg-gray-50 font-sans">
+    <!-- HEADER -->
+    <div id="header-bar" class="header-bar">
+      <div class="flex items-center gap-3">
+        <h1 id="app-title" class="text-lg font-bold text-gray-800">
+          Sounds of Poniat
+        </h1>
+      </div>
+      <div class="flex gap-2">
+        <button id="add-btn" class="header-btn header-btn-green hidden">
+          ＋
+        </button>
+        <button id="auth-btn" class="header-btn header-btn-blue">🔑</button>
+        <button id="burger" class="header-btn header-btn-burger">☰</button>
+      </div>
     </div>
 
-    <div class="container">
-      <!-- LEFT COLUMN -->
-      <div class="left-panel">
-        <h2>All Tracks</h2>
+    <!-- MAIN CONTAINER -->
+    <div
+      id="container"
+      class="flex flex-row absolute top-0 bottom-0 left-0 right-0"
+    >
+      <!-- tracks-list-panel -->
+      <div id="tracks-list-panel" class="tracks-list-panel">
         {% for track in tracks %}
         <div
-          class="track"
           id="track-{{ track.metadata.title }}"
-          data-owner = "{{ track.metadata.owner }}"
+          data-owner="{{ track.metadata.owner }}"
           data-lat="{{ track.metadata.lat }}"
           data-lon="{{ track.metadata.lon }}"
           data-color="{{ track.metadata.color or '#3388ff' }}"
+          class="track-card"
         >
-          <div class="track-header">
-            <div class = "track-title"> 
-            <h3 style="color: {{ track.metadata.color or '#000' }}">
+          <div
+            id="track-header-{{ track.metadata.title }}"
+            class="flex items-center justify-between mb-2"
+          >
+            <h3
+              id="track-title-{{ track.metadata.title }}"
+              data-color="{{ track.metadata.color }}"
+              class="track-title"
+            >
               {{ track.metadata.title }}
             </h3>
-            </div>
 
-            <div class="track-actions">
-              <!-- Edit button -->
+            <div
+              id="track-actions-{{ track.metadata.title }}"
+              class="flex gap-2"
+            >
               <button
-                class="edit-btn"
+                id="edit-btn-{{ track.metadata.title }}"
                 onclick="event.stopPropagation(); toggleEdit('{{ track.metadata.title }}')"
-                title="Rename track"
+                title="Edit track"
+                class="p-1.5 rounded-md text-blue-600 hover:bg-blue-600 hover:text-white transition"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M12.146.146a.5.5 0 0 1 .708 0l3 
-                             3a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 
-                             0 0 1-.168.11l-5 2a.5.5 0 0 
-                             1-.65-.65l2-5a.5.5 0 0 
-                             1 .11-.168l9.5-9.5zM11.207 
-                             2L3 10.207V13h2.793L14 
-                             4.793 11.207 2z"
-                  />
-                </svg>
+                ✏️
               </button>
-              <!-- Delete button -->
               <button
-                class="delete-btn"
-                onclick="deleteTrack('{{ track.metadata.title }}')"
+                id="delete-btn-{{ track.metadata.title }}"
+                onclick="event.stopPropagation(); deleteTrack('{{ track.metadata.title }}')"
                 title="Delete track"
+                class="p-1.5 rounded-md text-red-600 hover:bg-red-600 hover:text-white transition"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M5.5 5.5a.5.5 0 0 1 .5.5v7a.5.5 
-             0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zm2.5.5a.5.5 
-             0 0 1 1 0v7a.5.5 0 0 1-1 0v-7zm3 .5a.5.5 
-             0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 
-             0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 
-             0 0 1 0-2h3a1 1 0 0 1 1-1h4a1 1 0 
-             1 1 1 1h3a1 1 0 0 1 1 1z"
-                  />
-                </svg>
+                🗑
               </button>
             </div>
           </div>
 
-          {% if track.metadata.owner %}
-          <p><strong>Owner:</strong> {{ track.metadata.owner }}</p>
-          {% endif %} {% if track.metadata.lat and track.metadata.lon %}
-            <p class="track-coords">
-              <strong>Coordinates:</strong>
-              <span class="coords-lat">{{ track.metadata.lat }}</span>,
-              <span class="coords-lon">{{ track.metadata.lon }}</span>
-            </p>
-          {% endif %}
+          {% if track.metadata.lat and track.metadata.lon %}
+          <p
+            id="track-coords-{{ track.metadata.title }}"
+            data-lat="{{ track.metadata.lat }}"
+            data-lon="{{ track.metadata.lon }}"
+            class="text-sm text-gray-600 mb-4"
+          >
+            <span class="text-sm text-gray-600">📍</span>
 
-          <audio class="plyr" controls>
+            {{ track.metadata.lat }}, {{ track.metadata.lon }}
+          </p>
+          {% endif %} 
+
+          <audio
+            id="audio-{{ track.metadata.title }}"
+            controls
+            class="w-full mt-2 rounded-lg player-transparent"
+          >
             <source
               src="{{ url_for('sound.serve_sound', filename=track.file) }}"
               type="audio/{{ track.file.split('.')[-1] }}"
             />
           </audio>
+
+          <div
+            id="plyr-controls-{{ track.metadata.title }}"
+            data-track="{{ track.metadata.title }}"
+            class="mt-2"
+          >
+            <div id="plyr-progress-{{ track.metadata.title }}"></div>
+          </div>
+		  {% if track.metadata.owner %}
+          <p class="text-sm text-gray-600 flex justify-start"> 
+            <strong>Owner:</strong>
+			<span class="text-gray-400 ml-1">{{ track.metadata.owner }}</span>
+          </p>
+          {% endif %}
+
         </div>
         {% endfor %}
       </div>
 
-      <!-- RIGHT COLUMN -->
-      <div class="right-panel">
-        <div id="map"></div>
+      <!-- RIGHT PANEL -->
+      <div id="right-panel" class="flex-1 relative">
+        <div id="map" class="w-full h-full absolute inset-0 z-0"></div>
       </div>
 
-      <!-- Login form, Hidden slide-down form -->
-      <div class="auth-panel">
-        <div class="auth-content">
-        <h2>🔑 Login / Register</h2>
-        <form id="auth-form">
-          <input type="text" id="username" placeholder="Username" required />
-          <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            required
-          />
-          <div class="auth-buttons">
-            <button type="button" onclick="login()">Login</button>
-            <button type="button" onclick="register()">Register</button>
-          </div>
-          <div id="auth-status"></div>
-        </form>
+      <!-- AUTH PANEL -->
+      <div id="auth-panel" class="panel panel-closed hidden">
+        <div id="auth-content">
+          <h2 class="text-lg font-semibold mb-2">🔑 Login / Register</h2>
+          <form id="auth-form" class="flex flex-col gap-2">
+            <input
+              type="text"
+              id="auth-username"
+              placeholder="Username"
+              required
+              class="border rounded-md px-3 py-2"
+            />
+            <input
+              type="password"
+              id="auth-password"
+              placeholder="Password"
+              required
+              class="border rounded-md px-3 py-2"
+            />
+            <div class="flex gap-2">
+              <button
+                type="button"
+                onclick="login()"
+                class="flex-1 bg-blue-600 text-white rounded-md px-3 py-2 hover:bg-blue-700"
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                onclick="register()"
+                class="flex-1 bg-green-600 text-white rounded-md px-3 py-2 hover:bg-green-700"
+              >
+                Register
+              </button>
+            </div>
+            <div id="auth-status" class="text-sm text-red-600"></div>
+          </form>
         </div>
-        <div class = "auth-logged-in">
-        <div id="auth-logged-in-status"></div>
-        <button id="logout-btn" type="button" onclick="logout()">Logout</button>
-        </div>
+        <div id="auth-logged-in" class="mt-2">
+          <div id="auth-logged-in-status" class="mb-2"></div>
+          <button
+            id="logout-btn"
+            type="button"
+            onclick="logout()"
+            class="w-full bg-red-600 text-white rounded-md px-3 py-2 hover:bg-red-700"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
-      <!-- Add Track, Hidden slide-down form -->
-      <div id="add-form-panel" class="add-form-panel">
-        <form class="upload" enctype="multipart/form-data">
-          <h2>Add New Track</h2>
+      <!-- ADD TRACK PANEL -->
+      <div id="add-form-panel" class="panel panel-closed hidden">
+        <form
+          id="upload-form"
+          enctype="multipart/form-data"
+          class="flex flex-col gap-3"
+        >
+          <h2 class="text-lg font-semibold">Add New Track</h2>
           <input
             type="file"
             name="sound"
             accept="{{ config.FILE_ACCEPT }}"
             required
+            class="form-input"
           />
-          <input type="text" name="name" placeholder="Track Name" required />
           <input
+            type="text"
+            name="name"
+            placeholder="Track Name"
+            required
+            class="form-input"
+          />
+          <input
+            id="form-lat"
             type="number"
             step="any"
             name="lat"
             placeholder="Latitude"
             required
+            class="form-input"
           />
           <input
+            id="form-lon"
             type="number"
             step="any"
             name="lon"
             placeholder="Longitude"
             required
+            class="form-input"
           />
-          <label for="color">Pin Color:</label>
-          <input type="color" name="color" id="color" value="#3388ff" />
-          <button type="submit">Upload</button>
+          <div class="flex items-center gap-2">
+            <label for="form-color" class="text-sm font-medium"
+              >Pin Color:</label
+            >
+            <input
+              type="color"
+              id="form-color"
+              name="color"
+              value="#3388ff"
+              class="form-color"
+            />
+          </div>
+          <button type="submit" class="form-btn">Upload</button>
         </form>
       </div>
     </div>
 
-    <p class="footer"> Made by Sawyer </p>
+    <p id="footer" class="fixed bottom-0 left-0 text-xs text-gray-600 p-2 z-50">
+      Made by Sawyer
+    </p>
 
-    <!-- Leaflet JS -->
+    <!-- Popup template (hidden, not rendered) -->
+    <template id="popup-template">
+      <div class="popup-player">
+        <b class="popup-title"></b>
+        <div class="flex flex-col items-center gap-1 mt-1 w-full">
+          <div class="flex items-center justify-center gap-2 w-full">
+            <button
+              type="button"
+              class="popup-toggle"
+            >
+              ▶
+            </button>
+            <input
+              type="range"
+              class="popup-progress w-32 accent-blue-600"
+              min="0"
+              max="100"
+              step="0.1"
+              value="0"
+            />
+			<span class="popup-time text-xs text-gray-700">0:00 / 0:00</span>
+          </div>
+        </div>
+		<span class="popup-owner"></span>
+
+      </div>
+    </template>
+
+    <!-- Track edit template -->
+    <template id="track-edit-template">
+      <div class="track-edit">
+        <input
+          type="text"
+          class="edit-name form-input font-semibold text-gray-800 flex-1"
+        />
+        <input type="color" class="edit-color form-color ml-1" />
+      </div>
+    </template>
+
+    <template id="track-edit-actions-template">
+      <button
+        title="Save"
+        class="save-btn p-1.5 rounded-md text-green-600 hover:bg-green-600 hover:text-white transition"
+      >
+        💾
+      </button>
+    </template>
+
+    <template id="track-edit-coords-template">
+      <strong>Coordinates:</strong>
+      <span class="text-sm text-gray-600">📍</span>
+      <input
+        type="number"
+        step="any"
+        class="edit-lat form-input w-28 text-sm"
+      />
+      <input
+        type="number"
+        step="any"
+        class="edit-lon form-input w-28 text-sm"
+      />
+    </template>
+
+    <!-- Leaflet -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Map config -->
+    <!-- Config -->
     <script>
-      window.MAP = L.map('map', { 
-        minZoom: 3, maxZoom: 20, zoomSnap: 0.25,
-        wheelPxPerZoomLevel: 60, 
-        zoomControl: false,})
-    .setView([20, 0], 2);
+      window.MAP = L.map("map", {
+        minZoom: 3,
+        maxZoom: 20,
+        zoomSnap: 0.25,
+        wheelPxPerZoomLevel: 60,
+        zoomControl: false,
+      }).setView([20, 0], 2);
+
       window.BOUNDS = L.latLngBounds([]);
       window.BASE_AUDIO_URL = "{{ url_for('sound.serve_sound', filename='') }}";
       window.BASE_API_UPLOAD_URL = "{{ url_for('api.upload') }}";
@@ -207,17 +333,19 @@
       window.BASE_API_COLOR_URL = "{{ url_for('api.update_color', name='__NAME__') }}";
       window.BASE_API_LOCATION_URL = "{{ url_for('api.update_location', name='__NAME__') }}";
 
-       window.BASE_AUTH_REGISTER_URL = "{{ url_for('auth.register') }}";
-       window.BASE_AUTH_LOGIN_URL = "{{ url_for('auth.login') }}";
-       window.BASE_AUTH_ME_URL = "{{ url_for('auth.me') }}";
-       window.BASE_AUTH_LOGOUT_URL = "{{ url_for('auth.logout') }}";
+      window.BASE_AUTH_REGISTER_URL = "{{ url_for('auth.register') }}";
+      window.BASE_AUTH_LOGIN_URL = "{{ url_for('auth.login') }}";
+      window.BASE_AUTH_ME_URL = "{{ url_for('auth.me') }}";
+      window.BASE_AUTH_LOGOUT_URL = "{{ url_for('auth.logout') }}";
 
       window.TRACKS = {{ tracks|tojson }};
-      window.MARKERS = {}
+      window.MARKERS = {};
     </script>
+
     <!-- Local JS -->
     <script src="{{ url_for('static', filename='map.js') }}"></script>
     <script src="{{ url_for('static', filename='tracks.js') }}"></script>
+    <script src="{{ url_for('static', filename='tracks-list-panel.js') }}"></script>
     <script src="{{ url_for('static', filename='tracks-upload-panel.js') }}"></script>
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     <script src="{{ url_for('static', filename='player.js') }}"></script>

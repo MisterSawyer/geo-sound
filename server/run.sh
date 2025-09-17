@@ -15,6 +15,11 @@ source "$VENV/bin/activate"
 echo "Installing requirements..."
 pip install --upgrade pip
 pip install -r requirements.txt
+# install node dependencies
+npm install
+npm install npx
+# generate tailwind template
+npx tailwindcss -i ./geo_sound/static/input.css -o ./geo_sound/static/output.css
 
 echo "Running Geo-Sound Flask app with Gunicorn..."
 

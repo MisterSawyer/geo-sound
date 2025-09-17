@@ -18,69 +18,69 @@ document.addEventListener("DOMContentLoaded", function () {
   var tracks = window.TRACKS || [];
   window.BOUNDS = L.latLngBounds([]);
 
+  const popupTemplate = document.getElementById("popup-template");
+
   tracks.forEach((t) => {
     if (t.metadata.lat && t.metadata.lon) {
-      const pinColor = t.metadata.color || "#3388ff"; // fallback Leaflet blue
+      const pinColor = t.metadata.color || "#3388ff";
 
-      // Custom Leaflet colored icon
       const icon = L.divIcon({
-        className: "custom-pin",
+        className: "",
         html: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="36" viewBox="0 0 24 36">
-                       <path d="M12 0C6 0 0 6 0 12c0 9 12 24 12 24s12-15 12-24c0-6-6-12-12-12z"
-                             fill="${pinColor}" stroke="black" stroke-width="1"/>
-                     </svg>`,
+                 <path d="M12 0C6 0 0 6 0 12c0 9 12 24 12 24s12-15 12-24c0-6-6-12-12-12z"
+                       fill="${pinColor}" stroke="black" stroke-width="1"/>
+               </svg>`,
         iconSize: [24, 36],
         iconAnchor: [12, 36],
         popupAnchor: [0, -36],
       });
 
-    const playIcon = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="32" height="32">
-        <path d="M6 4.5v9l7-4.5-7-4.5z" fill="currentColor"/>
-      </svg>`;
-    const pauseIcon = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="32" height="32">
-        <path d="M6 4h2v10H6zm4 0h2v10h-2z" fill="currentColor"/>
-      </svg>`;
-
-      const popupDiv = document.createElement("div");
-      popupDiv.innerHTML = `
-        <b>${t.metadata.title}</b><br/>
-        ${t.metadata.owner || ""}<br/>
-        <div class="popup-player" data-track="${t.metadata.title}">
-            <button class="popup-toggle">▶</button>
-            <input type="range" class="popup-progress" min="0" max="100" step="0.1" value="0">
-            <span class="popup-time">0:00 / 0:00</span>
-        </div>
-        `;
+      const trackId = t.metadata.title;
 
       let marker = L.marker([t.metadata.lat, t.metadata.lon], { icon })
         .addTo(window.MAP)
-        .bindPopup(popupDiv);
+        .bindPopup(document.createElement("div")); // empty popup;
 
-      marker.on("popupopen", (e) => {
-        // Remove active from all tracks
-        document
-          .querySelectorAll(".track")
-          .forEach((el) => el.classList.remove("active"));
+      // On popup open → clone template fresh, fill in, attach
+      marker.on("popupopen", () => {
+        // Remove "active" from all tracks
+        document.querySelectorAll("[id^='track-']").forEach((el) =>
+          el.classList.remove("active")
+        );
 
-        // Highlight the matching track
-        const trackEl = document.getElementById(`track-${t.metadata.title}`);
+        // Highlight the matching track in sidebar
+        const trackEl = document.getElementById(`track-${trackId}`);
         if (trackEl) {
           trackEl.classList.add("active");
           trackEl.scrollIntoView({ behavior: "smooth", block: "center" });
         }
 
-        const popupDiv = e.popup.getElement().querySelector(".popup-player");
-        if (!popupDiv) return;
+        // --- Clone template ---
+        const fragment = popupTemplate.content.cloneNode(true);
+        const popupDiv = document.createElement("div");
+        popupDiv.appendChild(fragment);
 
-        const trackName = popupDiv.dataset.track;
-        const player = window.PLAYERS[trackName]; // Plyr instance in All Tracks
-        if (!player) return;
+        // Fill in dynamic values
+        popupDiv.querySelector(".popup-title").textContent = t.metadata.title;
+        popupDiv.querySelector(".popup-owner").textContent =
+          t.metadata.owner || "";
 
+        // Hook controls
         const toggleBtn = popupDiv.querySelector(".popup-toggle");
         const slider = popupDiv.querySelector(".popup-progress");
         const timeLabel = popupDiv.querySelector(".popup-time");
+
+        const player = window.PLAYERS[trackId];
+        if (!player) return;
+
+        const playIcon = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="32" height="32">
+            <path d="M6 4.5v9l7-4.5-7-4.5z" fill="currentColor"/>
+          </svg>`;
+        const pauseIcon = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="32" height="32">
+            <path d="M6 4h2v10H6zm4 0h2v10h-2z" fill="currentColor"/>
+          </svg>`;
 
         // --- Toggle play/pause ---
         const updateToggleIcon = () => {
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         };
 
-        // --- Update on player events ---
+        // --- Update UI on player events ---
         player.on("play", updateToggleIcon);
         player.on("pause", updateToggleIcon);
 
@@ -104,12 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
           const percent = (player.currentTime / player.duration) * 100;
           slider.value = percent || 0;
 
-          // Format mm:ss
           const fmt = (sec) => {
             const m = Math.floor(sec / 60);
-            const s = Math.floor(sec % 60)
-              .toString()
-              .padStart(2, "0");
+            const s = Math.floor(sec % 60).toString().padStart(2, "0");
             return `${m}:${s}`;
           };
           timeLabel.textContent = `${fmt(player.currentTime)} / ${fmt(
@@ -117,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
           )}`;
         });
 
-        // --- Seek from popup slider ---
+        // --- Seek from slider ---
         slider.addEventListener("input", () => {
           if (player.duration) {
             const time = (slider.value / 100) * player.duration;
@@ -125,59 +122,56 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
 
-        // Init button state
         updateToggleIcon();
+//open the tracks list panel
+  if (typeof window.openTracksList === "function") {
+
+    window.openTracksList();
+  }
+
+        // Finally, inject into popup
+        marker.setPopupContent(popupDiv);
       });
 
-      marker.on("popupclose", (e) => {
-        const trackEl = document.getElementById(`track-${t.metadata.title}`);
+      marker.on("popupclose", () => {
+        const trackEl = document.getElementById(`track-${trackId}`);
         if (trackEl) {
           trackEl.classList.remove("active");
         }
       });
 
       window.BOUNDS.extend(marker.getLatLng());
-
-      // store marker
-      window.MARKERS[t.metadata.title] = marker;
+      window.MARKERS[trackId] = marker;
     }
   });
 
   if (window.BOUNDS.isValid()) {
-    window.MAP.fitBounds(window.BOUNDS.pad(0.2));
+    window.MAP.fitBounds(window.BOUNDS.pad(0.5));
   }
 });
 
-// Helper to update marker position and show it
+// Marker helpers
 function showAddTrackMarker(lat, lon) {
   addTrackMarker.setLatLng([lat, lon]);
   addTrackMarker.setStyle({ opacity: 1, fillOpacity: 0.8 });
 }
 
-// Helper to hide marker
 function hideAddTrackMarker() {
   addTrackMarker.setStyle({ opacity: 0, fillOpacity: 0 });
 }
 
-// Expose helpers globally so tracks.js can use them
 window.showAddTrackMarker = showAddTrackMarker;
 window.hideAddTrackMarker = hideAddTrackMarker;
 
-// Right-click handler on map
+// Right-click handler for adding tracks
 window.MAP.on("contextmenu", function (e) {
   if (localStorage.getItem("auth_token") === null) return;
 
-  // e.latlng contains {lat, lng}
   const lat = e.latlng.lat.toFixed(6);
   const lon = e.latlng.lng.toFixed(6);
 
-  // Open the add form panel
-  const formPanel = document.getElementById("add-form-panel");
-  formPanel.classList.add("active");
-
-  // Fill coordinates into form inputs
-  const latInput = formPanel.querySelector('input[name="lat"]');
-  const lonInput = formPanel.querySelector('input[name="lon"]');
+  const latInput = document.getElementById("form-lat");
+  const lonInput = document.getElementById("form-lon");
 
   if (latInput && lonInput) {
     latInput.value = lat;
@@ -185,6 +179,10 @@ window.MAP.on("contextmenu", function (e) {
   }
 
   showAddTrackMarker(lat, lon);
+
+  if (window.openAddPanel) {
+    openAddPanel();
+  }
 });
 
 function addBoundsMask(map, maxBounds) {
@@ -210,18 +208,16 @@ function addBoundsMask(map, maxBounds) {
     fillOpacity: 0.3,
     stroke: true,
     interactive: true,
-    pane: "overlayPane", // keep under popups/markers
+    pane: "overlayPane",
   }).addTo(map);
 
-  // --- Recompute mask hole during pan/zoom ---
   function updateMask() {
-    console.log("updateMask");
     const inner = getInner();
     mask.setLatLngs([world, inner]);
   }
 
-  map.on("move", updateMask); // fires continuously during panning
-  map.on("zoom", updateMask); // fires during zoom animation
+  map.on("move", updateMask);
+  map.on("zoom", updateMask);
 
   return mask;
 }

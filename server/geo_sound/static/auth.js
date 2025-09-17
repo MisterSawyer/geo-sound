@@ -17,8 +17,8 @@ function clearToken() {
 }
 
 async function register() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const username = document.getElementById("auth-username").value.trim();
+  const password = document.getElementById("auth-password").value.trim();
 
   const res = await fetch(window.BASE_AUTH_REGISTER_URL, {
     method: "POST",
@@ -31,8 +31,8 @@ async function register() {
 }
 
 async function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const username = document.getElementById("auth-username").value.trim();
+  const password = document.getElementById("auth-password").value.trim();
 
   const res = await fetch(window.BASE_AUTH_LOGIN_URL, {
     method: "POST",
@@ -70,7 +70,6 @@ async function logout() {
     const data = await response.json();
 
     if (response.ok) {
-      // Clear token on successful logout
       clearToken();
       updateAuthUI();
     } else {
@@ -100,15 +99,15 @@ async function checkAuth() {
 
 function updateAuthUI() {
   const token = getToken();
-  const authContent = document.querySelector(".auth-content");
-  const authLoggedIn = document.querySelector(".auth-logged-in");
+  const authContent = document.getElementById("auth-content");
+  const authLoggedIn = document.getElementById("auth-logged-in");
+  const addBtn = document.getElementById("add-btn");
+  const username = getUsername();
 
-    const addBtn = document.getElementById("add-btn");
-    const username = getUsername();
-
-    document.querySelectorAll(".track-actions").forEach(el => {
-      el.style.display = "none";
-    });
+  // hide all track action panels first
+  document.querySelectorAll("[id^='track-actions-']").forEach(el => {
+    el.style.display = "none";
+  });
 
   if (token) {
     authContent.style.display = "none";
@@ -116,18 +115,15 @@ function updateAuthUI() {
 
     if (addBtn) addBtn.style.display = "inline-block";
 
-    // If logged in and we know username → show only owned track actions
     if (username) {
-        
-      document.querySelectorAll(".track").forEach((track) => {
+      document.querySelectorAll("[id^='track-']").forEach((track) => {
         if (track.dataset.owner === username) {
-           track.querySelectorAll(".track-actions").forEach(el => {
-             el.style.display = "flex";
-           })
+          const trackName = track.id.replace("track-", "");
+          const actionsEl = document.getElementById(`track-actions-${trackName}`);
+          if (actionsEl) actionsEl.style.display = "flex";
         }
       });
     }
-
   } else {
     authContent.style.display = "block";
     authLoggedIn.style.display = "none";
@@ -136,7 +132,6 @@ function updateAuthUI() {
   }
 }
 
-// Call when page loads
+
 document.addEventListener("DOMContentLoaded", updateAuthUI);
 document.addEventListener("DOMContentLoaded", checkAuth);
-
