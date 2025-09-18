@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Sounds of Poniat</title>
 
     <!-- Tailwind build -->
@@ -283,7 +285,7 @@
       <div class="track-edit">
         <input
           type="text"
-          class="edit-name form-input font-semibold text-gray-800 flex-1"
+          class="edit-name track-edit-input font-semibold text-gray-800 flex-1"
         />
         <input type="color" class="edit-color form-color ml-1" />
       </div>
@@ -299,17 +301,16 @@
     </template>
 
     <template id="track-edit-coords-template">
-      <strong>Coordinates:</strong>
       <span class="text-sm text-gray-600">📍</span>
       <input
         type="number"
         step="any"
-        class="edit-lat form-input w-28 text-sm"
+        class="edit-lat track-edit-input text-sm"
       />
       <input
         type="number"
         step="any"
-        class="edit-lon form-input w-28 text-sm"
+        class="edit-lon track-edit-input text-sm"
       />
     </template>
 

@@ -2,21 +2,25 @@
 
 @layer components {
   .header-bar {
-    @apply fixed inset-x-0 top-0 h-14 flex items-center justify-between
+    @apply fixed inset-x-0 top-0 h-18 flex items-center justify-between
            border-b border-gray-200 px-4 z-50
            bg-white/60 backdrop-blur-md shadow-md;
+
+    @apply sm:h-14;
   }
 
   /* Base style for all header buttons */
   .header-btn {
-    @apply h-10 w-10 flex items-center justify-center
-           px-3 py-2 rounded-lg transition-colors font-medium text-white;
+    /* Default: mobile (big) */
+    @apply h-14 w-14 px-4 py-3 text-lg flex items-center justify-center
+           rounded-lg transition-colors font-medium text-white;
+    @apply sm:h-12 sm:w-12;
   }
 
-    .header-btn-pressed {
+  .header-btn-pressed {
     @apply ring-2 ring-offset-1 ring-[#3388ff];
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
-    }
+  }
 
   .header-btn-green {
     @apply bg-green-600 hover:bg-green-700;
@@ -31,11 +35,13 @@
   }
 
   .tracks-list-panel {
-    @apply fixed top-14 right-0 h-[calc(100vh-3.5rem)] 
-           w-[28rem]
+    @apply fixed top-18 right-0 h-[calc(100vh-3.5rem)] 
+           w-[18rem]
            border-l border-gray-200 z-40 overflow-y-auto p-4
            bg-white/60 backdrop-blur-md shadow-lg
            transform translate-x-0 transition-transform duration-300;
+
+    @apply sm:top-14 sm:w-[28rem];
   }
 
   .tracks-list-panel-closed {
@@ -78,12 +84,23 @@
     color: var(--track-color, #3388ff);
   }
 
+  .track-edit-input {
+    @apply border border-gray-300 rounded-md px-2 py-1
+           focus:outline-none focus:ring focus:ring-blue-200
+           h-9
+           max-w-22
+           align-middle; /* force consistent height */
+    @apply sm:max-w-36;
+  }
+
   /* Base style shared by all panels */
   .panel {
-    @apply absolute top-16 right-4 w-80 max-w-full 
+    @apply absolute top-20 right-4 w-80 max-w-full 
            border border-gray-200 rounded-xl p-5 z-50
            transform transition-all duration-300 ease-out
            bg-white/60 backdrop-blur-md shadow-xl;
+
+    @apply sm:top-16;
   }
 
   .panel-closed {
@@ -171,7 +188,7 @@
 
   /* Row 1 col 2: progress */
   .plyr--audio .plyr__progress__container {
-    grid-column: 1 /span 3;
+    grid-column: 1 / span 3;
     grid-row: 1;
     width: 100% !important;
   }
@@ -192,12 +209,12 @@
   .plyr-buttons-row {
     @apply flex justify-center items-center gap-2 mt-1;
   }
-  
+
   .popup-title {
     @apply block text-center font-semibold text-gray-800;
   }
 
-.popup-toggle {
+  .popup-toggle {
     @apply bg-white text-gray-600 rounded-md transition;
   }
 
@@ -206,7 +223,7 @@
     color: white;
   }
 
-    .popup-owner {
+  .popup-owner {
     @apply block text-left text-gray-400;
   }
 }
