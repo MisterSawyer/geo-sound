@@ -2,9 +2,7 @@
 
 @layer components {
   .header-bar {
-    @apply fixed inset-x-0 top-0 h-18 flex items-center justify-between
-           border-b border-gray-200 px-4 z-50
-           bg-white/60 backdrop-blur-md shadow-md;
+    @apply fixed inset-x-0 top-0 h-18 flex items-center justify-between border-b border-gray-200 px-4 z-50 bg-white/60 backdrop-blur-md shadow-md;
 
     @apply sm:h-14;
   }
@@ -12,8 +10,7 @@
   /* Base style for all header buttons */
   .header-btn {
     /* Default: mobile (big) */
-    @apply h-14 w-14 px-4 py-3 text-lg flex items-center justify-center
-           rounded-lg transition-colors font-medium text-white;
+    @apply h-14 w-14 px-4 py-3 text-lg flex items-center justify-center rounded-lg transition-colors font-medium text-white;
     @apply sm:h-12 sm:w-12;
   }
 
@@ -35,21 +32,19 @@
   }
 
   .tracks-list-panel {
-    @apply fixed top-18 right-0 h-[calc(100vh-3.5rem)] 
-           w-[18rem]
-           border-l border-gray-200 z-40 overflow-y-auto p-4
-           bg-white/60 backdrop-blur-md shadow-lg
-           transform translate-x-0 transition-transform duration-300;
+    @apply fixed top-18 right-0 h-[calc(100vh-3.5rem)] w-[18rem] border-l border-gray-200 z-40 overflow-y-auto p-4 bg-white/60 backdrop-blur-md shadow-lg transform translate-x-0 transition-transform duration-300;
 
     @apply sm:top-14 sm:w-[28rem];
   }
 
   .tracks-list-panel-closed {
-    transform: translateX(100%); /* hidden off screen to the right */
+    transform: translateX(100%);
+    /* hidden off screen to the right */
   }
 
   .tracks-list-panel-open {
-    transform: translateX(0); /* visible */
+    transform: translateX(0);
+    /* visible */
   }
 
   #tracks-list-panel::-webkit-scrollbar {
@@ -61,17 +56,18 @@
   }
 
   #tracks-list-panel::-webkit-scrollbar-thumb {
-    background: #94a3b8; /* slate-400 */
+    background: #94a3b8;
+    /* slate-400 */
     border-radius: 5px;
   }
 
   #tracks-list-panel::-webkit-scrollbar-thumb:hover {
-    background: #64748b; /* slate-500 */
+    background: #64748b;
+    /* slate-500 */
   }
 
   .track-card {
-    @apply mb-4 p-4 bg-white rounded-lg shadow
-    hover:shadow-md hover:bg-blue-50 transition cursor-pointer;
+    @apply mb-4 p-4 bg-white rounded-lg shadow hover:shadow-md hover:bg-blue-50 transition cursor-pointer;
   }
 
   /* Active state when linked to a map pin */
@@ -91,20 +87,14 @@
   }
 
   .track-edit-input {
-    @apply border border-gray-300 rounded-md px-2 py-1
-           focus:outline-none focus:ring focus:ring-blue-200
-           h-9
-           max-w-22
-           align-middle; /* force consistent height */
+    @apply border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring focus:ring-blue-200 h-9 max-w-22 align-middle;
+    /* force consistent height */
     @apply sm:max-w-36;
   }
 
   /* Base style shared by all panels */
   .panel {
-    @apply absolute top-20 right-4 w-80 max-w-full 
-           border border-gray-200 rounded-xl p-5 z-50
-           transform transition-all duration-300 ease-out
-           bg-white/60 backdrop-blur-md shadow-xl;
+    @apply absolute top-20 right-4 w-80 max-w-full border border-gray-200 rounded-xl p-5 z-50 transform transition-all duration-300 ease-out bg-white/60 backdrop-blur-md shadow-xl;
 
     @apply sm:top-16;
   }
@@ -122,10 +112,8 @@
   }
 
   .form-input {
-    @apply border border-gray-300 rounded-md px-2 py-1
-           focus:outline-none focus:ring focus:ring-blue-200
-           h-9
-           align-middle; /* force consistent height */
+    @apply border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring focus:ring-blue-200 h-9 align-middle;
+    /* force consistent height */
   }
 
   .form-color {
@@ -138,17 +126,16 @@
 
   /* Base file input style */
   .form-input[type="file"] {
-    @apply block w-full text-sm text-gray-700 border border-gray-300 
-           rounded-md cursor-pointer focus:outline-none focus:ring 
-           focus:ring-blue-200 h-9; /* same height as other inputs */
-    padding: 0; /* let the button control padding */
+    @apply block w-full text-sm text-gray-700 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring focus:ring-blue-200 h-9;
+    /* same height as other inputs */
+    padding: 0;
+    /* let the button control padding */
   }
 
   /* "Choose file" button */
   .form-input[type="file"]::file-selector-button {
-    @apply bg-blue-600 text-white text-sm font-medium px-3 py-1.5
-           rounded-md border-0 cursor-pointer mr-3 transition
-           h-9; /* force button height to match */
+    @apply bg-blue-600 text-white text-sm font-medium px-3 py-1.5 rounded-md border-0 cursor-pointer mr-3 transition h-9;
+    /* force button height to match */
   }
 
   .form-input[type="file"]::file-selector-button:hover {
@@ -157,20 +144,27 @@
 
   /* Safari / old WebKit */
   .form-input[type="file"]::-webkit-file-upload-button {
-    @apply bg-blue-600 text-white text-sm font-medium px-3 py-1.5
-           rounded-md border-0 cursor-pointer mr-3 transition
-           h-9;
+    @apply bg-blue-600 text-white text-sm font-medium px-3 py-1.5 rounded-md border-0 cursor-pointer mr-3 transition h-9;
   }
 
   .form-input[type="file"]::-webkit-file-upload-button:hover {
     @apply bg-blue-700;
   }
 
+  #map {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
   /* Controls grid: 3 cols top row, 3 cols bottom row */
   .plyr--audio .plyr__controls {
     display: grid !important;
-    grid-template-columns: auto 1fr auto; /* play | progress | volume */
-    grid-template-rows: auto auto; /* row1 = controls, row2 = timer+speaker */
+    grid-template-columns: auto 1fr auto;
+    /* play | progress | volume */
+    grid-template-rows: auto auto;
+    /* row1 = controls, row2 = timer+speaker */
     align-items: center;
     gap: 0.4rem 0.6rem;
     background-color: transparent !important;
@@ -179,7 +173,7 @@
   }
 
   /* Row 1 col 1: play */
-  .plyr--audio .plyr__controls > .plyr__control[data-plyr="play"] {
+  .plyr--audio .plyr__controls>.plyr__control[data-plyr="play"] {
     grid-column: 1;
     grid-row: 2;
     justify-self: start;
@@ -225,7 +219,8 @@
   }
 
   .popup-toggle:hover {
-    background-color: #3388ff; /* static hover color */
+    background-color: #3388ff;
+    /* static hover color */
     color: white;
   }
 

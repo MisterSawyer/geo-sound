@@ -6,8 +6,6 @@ function closeTracksList() {
   tracksListPanel.classList.add("translate-x-full");
   burger.classList.remove("header-btn-pressed");
 
-  document.removeEventListener("click", handleOutside);
-
   setTimeout(() => {
     if (window.MAP) window.MAP.invalidateSize();
   }, 310);
