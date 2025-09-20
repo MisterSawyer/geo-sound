@@ -35,7 +35,6 @@ const duration = playerRoot.querySelector(".plyr__time--duration");
 
     // --- 1. Wrap buttons (your existing code) ---
     if (!ctrls.querySelector("[id^='plyr-buttons-row-']")) {
-        console.log("wrap")
       const row = document.createElement("div");
       row.id = `plyr-buttons-row-${ctrls.dataset.track}`;
       row.classList.add("plyr-buttons-row");

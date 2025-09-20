@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Sounds of Poniat</title>
 
@@ -60,7 +60,7 @@
         >
           <div
             id="track-header-{{ track.metadata.title }}"
-            class="flex items-center justify-between mb-2"
+            class="track-header"
           >
             <h3
               id="track-title-{{ track.metadata.title }}"
@@ -104,7 +104,7 @@
 
             {{ track.metadata.lat }}, {{ track.metadata.lon }}
           </p>
-          {% endif %} 
+          {% endif %}
 
           <audio
             id="audio-{{ track.metadata.title }}"
@@ -124,13 +124,12 @@
           >
             <div id="plyr-progress-{{ track.metadata.title }}"></div>
           </div>
-		  {% if track.metadata.owner %}
-          <p class="text-sm text-gray-600 flex justify-start"> 
+          {% if track.metadata.owner %}
+          <p class="text-sm text-gray-600 flex justify-start">
             <strong>Owner:</strong>
-			<span class="text-gray-400 ml-1">{{ track.metadata.owner }}</span>
+            <span class="text-gray-400 ml-1">{{ track.metadata.owner }}</span>
           </p>
           {% endif %}
-
         </div>
         {% endfor %}
       </div>
@@ -258,12 +257,7 @@
         <b class="popup-title"></b>
         <div class="flex flex-col items-center gap-1 mt-1 w-full">
           <div class="flex items-center justify-center gap-2 w-full">
-            <button
-              type="button"
-              class="popup-toggle"
-            >
-              ▶
-            </button>
+            <button type="button" class="popup-toggle">▶</button>
             <input
               type="range"
               class="popup-progress w-32 accent-blue-600"
@@ -272,11 +266,10 @@
               step="0.1"
               value="0"
             />
-			<span class="popup-time text-xs text-gray-700">0:00 / 0:00</span>
+            <span class="popup-time text-xs text-gray-700">0:00 / 0:00</span>
           </div>
         </div>
-		<span class="popup-owner"></span>
-
+        <span class="popup-owner"></span>
       </div>
     </template>
 

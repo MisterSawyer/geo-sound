@@ -7,9 +7,15 @@ function authHeaders(extra = {}) {
 async function deleteTrack(name) {
   if (!confirm(`Are you sure you want to delete '${name}'?`)) return;
 
-  const url = window.BASE_API_DELETE_URL.replace("__NAME__", encodeURIComponent(name));
+  const url = window.BASE_API_DELETE_URL.replace(
+    "__NAME__",
+    encodeURIComponent(name)
+  );
   try {
-    const response = await fetch(url, { method: "DELETE", headers: authHeaders() });
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
     const data = await response.json();
     if (response.ok) {
       window.location.reload();
@@ -43,7 +49,10 @@ async function addTrack(formElement) {
 }
 
 async function renameTrack(oldName, newName) {
-  const url = window.BASE_API_RENAME_URL.replace("__OLD__", encodeURIComponent(oldName));
+  const url = window.BASE_API_RENAME_URL.replace(
+    "__OLD__",
+    encodeURIComponent(oldName)
+  );
   try {
     const response = await fetch(url, {
       method: "PUT",
@@ -59,7 +68,10 @@ async function renameTrack(oldName, newName) {
 }
 
 async function changeColor(name, color) {
-  const url = window.BASE_API_COLOR_URL.replace("__NAME__", encodeURIComponent(name));
+  const url = window.BASE_API_COLOR_URL.replace(
+    "__NAME__",
+    encodeURIComponent(name)
+  );
   try {
     const response = await fetch(url, {
       method: "PUT",
@@ -75,7 +87,10 @@ async function changeColor(name, color) {
 }
 
 async function changeLocation(name, lat, lon) {
-  const url = window.BASE_API_LOCATION_URL.replace("__NAME__", encodeURIComponent(name));
+  const url = window.BASE_API_LOCATION_URL.replace(
+    "__NAME__",
+    encodeURIComponent(name)
+  );
   try {
     const response = await fetch(url, {
       method: "PUT",
@@ -109,7 +124,11 @@ async function confirmEdit(trackName) {
   if (!titleEl || !actionsEl || !coordsEl) return;
 
   const colorInput = document.getElementById(`edit-color-${trackName}`);
-  if (colorInput && colorInput.value && colorInput.value !== titleEl.dataset.color) {
+  if (
+    colorInput &&
+    colorInput.value &&
+    colorInput.value !== titleEl.dataset.color
+  ) {
     await changeColor(trackName, colorInput.value);
   }
 
@@ -124,7 +143,11 @@ async function confirmEdit(trackName) {
   }
 
   const nameInput = document.getElementById(`edit-name-${trackName}`);
-  if (nameInput && nameInput.value.trim() && nameInput.value.trim() !== trackName) {
+  if (
+    nameInput &&
+    nameInput.value.trim() &&
+    nameInput.value.trim() !== trackName
+  ) {
     await renameTrack(trackName, nameInput.value.trim());
   }
 
@@ -177,7 +200,9 @@ function toggleEdit(trackName) {
   const originalLon = coordsEl.dataset.lon;
 
   // --- Title (name + color) ---
-  const titleFrag = document.getElementById("track-edit-template").content.cloneNode(true);
+  const titleFrag = document
+    .getElementById("track-edit-template")
+    .content.cloneNode(true);
   const nameInput = titleFrag.querySelector(".edit-name");
   const colorInput = titleFrag.querySelector(".edit-color");
   nameInput.id = `edit-name-${trackName}`;
@@ -188,14 +213,18 @@ function toggleEdit(trackName) {
   titleEl.appendChild(titleFrag);
 
   // --- Actions (save button) ---
-  const actionsFrag = document.getElementById("track-edit-actions-template").content.cloneNode(true);
+  const actionsFrag = document
+    .getElementById("track-edit-actions-template")
+    .content.cloneNode(true);
   const saveBtn = actionsFrag.querySelector(".save-btn");
   saveBtn.id = `save-btn-${trackName}`;
   actionsEl.innerHTML = "";
   actionsEl.appendChild(actionsFrag);
 
   // --- Coordinates ---
-  const coordsFrag = document.getElementById("track-edit-coords-template").content.cloneNode(true);
+  const coordsFrag = document
+    .getElementById("track-edit-coords-template")
+    .content.cloneNode(true);
   const latInput = coordsFrag.querySelector(".edit-lat");
   const lonInput = coordsFrag.querySelector(".edit-lon");
   latInput.id = `edit-lat-${trackName}`;
@@ -237,14 +266,60 @@ document.querySelectorAll("[id^='track-']").forEach((trackEl) => {
   });
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  // iterate over window.TRACKS
+  window.TRACKS.forEach((track) => {
+    const titleEl = document.getElementById(
+      `track-title-${track.metadata.title}`
+    );
+    if (titleEl) {
+      titleEl.style.setProperty(
+        "--track-color",
+        track.metadata.color || "#3388ff"
+      );
+    }
+  });
+  //
+});
 
 document.addEventListener("DOMContentLoaded", () => {
-    // iterate over window.TRACKS
-    window.TRACKS.forEach(track => {
-      const titleEl = document.getElementById(`track-title-${track.metadata.title}`);
-      if (titleEl) {
-        titleEl.style.setProperty("--track-color", track.metadata.color || "#3388ff");
+  window.TRACKS.forEach((track) => {
+    const trackEl = document.getElementById(`track-${track.metadata.title}`);
+
+    const titleEl = document.getElementById(
+      `track-title-${track.metadata.title}`
+    );
+    const headerEl = document.getElementById(
+      `track-header-${track.metadata.title}`
+    );
+
+    if (titleEl && trackEl && headerEl) {
+      const pinColor = track.metadata.color || "#3388ff";
+      titleEl.style.setProperty("--track-color", pinColor);
+
+      // Parse hex → RGB
+      const r = parseInt(pinColor.substr(1, 2), 16);
+      const g = parseInt(pinColor.substr(3, 2), 16);
+      const b = parseInt(pinColor.substr(5, 2), 16);
+
+      // Relative luminance
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      // Outline only if bright pin (luminance > 0.7)
+      if (luminance > 0.5) {
+        titleEl.style.textShadow = `
+          -1px -1px 0 #555,
+           1px -1px 0 #555,
+          -1px  1px 0 #333,
+           1px  1px 0 #333
+        `;
+      } else {
+        titleEl.style.textShadow = `
+          -1px -1px 0 #bbb,
+           1px -1px 0 #bbb,
+          -1px  1px 0 #bbb,
+           1px  1px 0 #bbb
+        `;
       }
-    })
-//
+    }
+  });
 });

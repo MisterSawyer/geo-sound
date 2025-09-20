@@ -71,7 +71,7 @@
 
   .track-card {
     @apply mb-4 p-4 bg-white rounded-lg shadow
-           hover:shadow-md hover:bg-blue-50 transition cursor-pointer;
+    hover:shadow-md hover:bg-blue-50 transition cursor-pointer;
   }
 
   /* Active state when linked to a map pin */
@@ -80,8 +80,14 @@
   }
 
   .track-title {
-    @apply font-semibold;
+    @apply font-semibold px-1 rounded;
     color: var(--track-color, #3388ff);
+    background-color: var(--track-bg, transparent);
+  }
+
+  .track-header {
+    @apply flex items-center justify-between mb-2 rounded-md px-2 py-1;
+    background-color: var(--track-bg, transparent);
   }
 
   .track-edit-input {
