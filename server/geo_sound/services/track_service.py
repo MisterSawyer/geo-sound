@@ -1,7 +1,28 @@
 import os, json
 from pathlib import Path
+from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import current_app
+
+def _parse_iso8601_or_none(s: str | None):
+    if not s:
+        return None
+    try:
+        # Accept 'Z' or offset; browsers' datetime-local gives no tz—treat it as local string
+        # We store exactly the string provided (optional), but also try to validate it.
+        # Accept both "YYYY-MM-DDTHH:MM" and full ISO.
+        s2 = s.strip()
+        if s2.endswith("Z"):
+            s2 = s2.replace("Z", "+00:00")
+        # Allow seconds-less format
+        try:
+            datetime.fromisoformat(s2)
+        except ValueError:
+            # add ":00" seconds fallback
+            datetime.fromisoformat(s2 + ":00")
+        return s.strip()
+    except Exception:
+        return None
 
 def allowed_file(filename: str) -> bool:
     return (
@@ -49,6 +70,7 @@ def save_track(request, owner):
     lat = request.form.get("lat")
     lon = request.form.get("lon")
     color = request.form.get("color", "#3388ff")
+    recorded_at_raw = request.form.get("recorded_at")  # NEW
 
     if not sound_file or not allowed_file(sound_file.filename):
         return None, {"error": f"Only {', '.join(current_app.config['ALLOWED_EXTENSIONS'])} allowed"}
@@ -84,6 +106,12 @@ def save_track(request, owner):
     sound_file.save(sound_path)
 
     metadata = {"title": name, "owner": owner, "lat": lat, "lon": lon, "color" : color}
+
+    # --- OPTIONAL METADATA ---
+
+    parsed_at = _parse_iso8601_or_none(recorded_at_raw)
+    if parsed_at:
+        metadata["recorded_at"] = parsed_at
 
     with open(metadata_path, "w", encoding="utf-8") as jf:
         json.dump(metadata, jf, indent=2)
@@ -230,3 +258,33 @@ def change_track_location(name: str, new_lat: float, new_lon: float):
         "lat": metadata["lat"],
         "lon": metadata["lon"]
     }, None
+
+def change_track_recorded_at(name: str, recorded_at: str | None):
+    """Update track metadata recorded_at (ISO 8601 string or empty to clear)."""
+    metadata_dir = current_app.config["METADATA_DIR"]
+    metadata_path = os.path.join(metadata_dir, secure_filename(name + ".json"))
+    if not os.path.exists(metadata_path):
+        return None, {"error": f"No metadata found for track '{name}'"}
+
+    try:
+        with open(metadata_path, "r", encoding="utf-8") as jf:
+            metadata = json.load(jf)
+    except Exception as e:
+        return None, {"error": f"Could not load metadata: {e}"}
+
+    s = recorded_at.strip() if recorded_at else ""
+    if s:
+        parsed = _parse_iso8601_or_none(s)
+        if not parsed:
+            return None, {"error": "Invalid 'recorded_at' format (expect ISO 8601, e.g. 2025-10-16T13:45 or ...:45Z)"}
+        metadata["recorded_at"] = parsed
+    else:
+        metadata.pop("recorded_at", None)
+
+    try:
+        with open(metadata_path, "w", encoding="utf-8") as jf:
+            json.dump(metadata, jf, indent=2)
+    except Exception as e:
+        return None, {"error": f"Could not save metadata: {e}"}
+
+    return {"message": f"recorded_at updated for '{name}'", "recorded_at": metadata.get("recorded_at")}, None

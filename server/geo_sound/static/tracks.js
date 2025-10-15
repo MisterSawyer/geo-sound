@@ -105,6 +105,22 @@ async function changeLocation(name, lat, lon) {
   }
 }
 
+async function changeRecordedAt(name, recorded_at /* string or "" to clear */) {
+  const url = window.BASE_API_RECORDED_AT_URL.replace("__NAME__", encodeURIComponent(name));
+  try {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ recorded_at }),
+    });
+    const data = await response.json();
+    if (!response.ok) alert(data.error || "Failed to update recorded_at");
+  } catch (err) {
+    console.error("Recorded_at update failed:", err);
+    alert("Error updating recorded date/time");
+  }
+}
+
 // --- Editing logic ---
 const editListeners = {};
 const originalState = {};
@@ -123,6 +139,7 @@ async function confirmEdit(trackName) {
   const coordsEl = document.getElementById(`track-coords-${trackName}`);
   if (!titleEl || !actionsEl || !coordsEl) return;
 
+  // COLOR
   const colorInput = document.getElementById(`edit-color-${trackName}`);
   if (
     colorInput &&
@@ -132,16 +149,27 @@ async function confirmEdit(trackName) {
     await changeColor(trackName, colorInput.value);
   }
 
+  // LOCATION
   const latInput = document.getElementById(`edit-lat-${trackName}`);
   const lonInput = document.getElementById(`edit-lon-${trackName}`);
   if (latInput && lonInput) {
     const newLat = latInput.value;
     const newLon = lonInput.value;
-    if (newLat && newLon) {
+    if (newLat && newLon &&
+      (newLat !== coordsEl.dataset.lat || newLon !== coordsEl.dataset.lon)
+    ) {
       await changeLocation(trackName, newLat, newLon);
     }
   }
 
+  // RECORDED AT
+  const recInput = document.getElementById(`edit-recorded-${trackName}`);
+  if (recInput) {
+    // If input is empty => clear on server
+    await changeRecordedAt(trackName, recInput.value || "");
+  }
+
+  // NAME
   const nameInput = document.getElementById(`edit-name-${trackName}`);
   if (
     nameInput &&
@@ -159,6 +187,8 @@ function cancelEdit(trackName) {
   const titleEl = document.getElementById(`track-title-${trackName}`);
   const actionsEl = document.getElementById(`track-actions-${trackName}`);
   const coordsEl = document.getElementById(`track-coords-${trackName}`);
+  const recordedEl = document.getElementById(`track-recorded-${trackName}`);
+
   if (!titleEl || !actionsEl || !coordsEl) return;
 
   const refs = originalState[trackName];
@@ -167,6 +197,7 @@ function cancelEdit(trackName) {
   titleEl.innerHTML = refs.title;
   actionsEl.innerHTML = refs.actions;
   coordsEl.innerHTML = refs.coords;
+  recordedEl.innerHTML = refs.recorded;
 
   delete originalState[trackName];
   removeListeners(trackName);
@@ -176,6 +207,8 @@ function toggleEdit(trackName) {
   const titleEl = document.getElementById(`track-title-${trackName}`);
   const actionsEl = document.getElementById(`track-actions-${trackName}`);
   const coordsEl = document.getElementById(`track-coords-${trackName}`);
+  const recordedEl = document.getElementById(`track-recorded-${trackName}`);
+
   if (!titleEl || !actionsEl || !coordsEl) return;
 
   if (originalState[trackName]) {
@@ -193,11 +226,13 @@ function toggleEdit(trackName) {
     title: titleEl.innerHTML,
     actions: actionsEl.innerHTML,
     coords: coordsEl.innerHTML,
+    recorded: recordedEl.innerHTML 
   };
 
   const originalColor = titleEl.dataset.color || "#3388ff";
   const originalLat = coordsEl.dataset.lat;
   const originalLon = coordsEl.dataset.lon;
+  const originalRecorded = (recordedEl?.dataset.recorded) || "";
 
   // --- Title (name + color) ---
   const titleFrag = document
@@ -234,6 +269,30 @@ function toggleEdit(trackName) {
   coordsEl.innerHTML = "";
   coordsEl.appendChild(coordsFrag);
 
+  // --- Recorded at (datetime-local) ---
+  const recordedFrag = document.getElementById("track-edit-recorded-template").content.cloneNode(true);
+  const recInput = recordedFrag.querySelector(".edit-recorded");
+  recInput.id = `edit-recorded-${trackName}`;
+  // Attempt to prefill in datetime-local friendly format:
+  // If stored like "2025-10-16T13:45:00+02:00", browsers often accept "2025-10-16T13:45"
+  try {
+    const v = originalRecorded;
+    if (v) {
+      // strip timezone/seconds for input convenience
+      // keep "YYYY-MM-DDTHH:MM"
+      const m = v.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
+      if (m) recInput.value = m[1];
+    }
+  } catch {}
+  // Insert under coords
+  const wrapper = document.createElement("div");
+  wrapper.className = "mt-2";
+  wrapper.appendChild(recordedFrag);
+  recordedEl.classList.remove("hidden");
+  recordedEl.innerHTML = "";
+  recordedEl.appendChild(wrapper);
+
+  // focus
   nameInput.focus();
 
   // listeners

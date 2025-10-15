@@ -77,6 +77,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const latInput = document.getElementById("form-lat");
   const lonInput = document.getElementById("form-lon");
 
+  const recordedAtInput = document.getElementById("form-recorded-at");
+
+  //
+  // --- Recorded At placeholder color ---
+  //
+  const updateRecordedAtColor = () => {
+    if (!recordedAtInput) return;
+    if (recordedAtInput.value.trim() === "") {
+      recordedAtInput.classList.remove("placeholder-black");
+      recordedAtInput.classList.add("placeholder-gray");
+    } else {
+      recordedAtInput.classList.remove("placeholder-gray");
+      recordedAtInput.classList.add("placeholder-black");
+    }
+  };
+
+  if(recordedAtInput)recordedAtInput.addEventListener("input", updateRecordedAtColor);
+  updateRecordedAtColor(); // initialize on load
+
   //
   // --- Marker updating ---
   //

@@ -93,12 +93,26 @@
             </div>
           </div>
 
+          {% if track.metadata.recorded_at %}
+          <p id="track-recorded-{{ track.metadata.title }}"
+             data-recorded="{{ track.metadata.recorded_at }}"
+             class="text-sm text-gray-400 mb-2">
+            🗓️ {{ track.metadata.recorded_at }}
+          </p>
+          {% else %}
+          <p id="track-recorded-{{ track.metadata.title }}"
+             data-recorded=""
+             class="text-sm text-gray-400 mb-2 hidden">
+            <!-- becomes visible when user sets it -->
+          </p>
+          {% endif %}
+
           {% if track.metadata.lat and track.metadata.lon %}
           <p
             id="track-coords-{{ track.metadata.title }}"
             data-lat="{{ track.metadata.lat }}"
             data-lon="{{ track.metadata.lon }}"
-            class="text-sm text-gray-600 mb-4"
+            class="text-sm text-gray-400 mb-4"
           >
             <span class="text-sm text-gray-600">📍</span>
 
@@ -212,6 +226,15 @@
             required
             class="form-input"
           />
+          <div class="flex items-center gap-2">
+          <input
+            type="datetime-local"
+            id="form-recorded-at"
+            name="recorded_at"
+            placeholder="Recorded At"
+            class="form-input w-full placeholder-gray"
+          />
+          </div>
           <input
             id="form-lat"
             type="number"
@@ -307,6 +330,13 @@
       />
     </template>
 
+    <template id="track-edit-recorded-template">
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-gray-600">🗓️</span>
+        <input type="datetime-local" class="edit-recorded form-input w-56 text-sm" />
+      </div>
+    </template>
+
     <!-- Leaflet -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <!-- Config -->
@@ -326,6 +356,7 @@
       window.BASE_API_RENAME_URL = "{{ url_for('api.rename', old_name='__OLD__') }}";
       window.BASE_API_COLOR_URL = "{{ url_for('api.update_color', name='__NAME__') }}";
       window.BASE_API_LOCATION_URL = "{{ url_for('api.update_location', name='__NAME__') }}";
+      window.BASE_API_RECORDED_AT_URL = "{{ url_for('api.update_recorded_at', name='__NAME__') }}";
 
       window.BASE_AUTH_REGISTER_URL = "{{ url_for('auth.register') }}";
       window.BASE_AUTH_LOGIN_URL = "{{ url_for('auth.login') }}";
