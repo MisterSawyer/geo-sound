@@ -1,3 +1,5 @@
+import os
+import logging
 from flask import Flask
 
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -10,12 +12,29 @@ def create_app():
     app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
 
     config_obj = DevConfig()
+    app.logger.setLevel(logging.DEBUG)
+
+    if(not os.path.exists(config_obj.ASSETS_DIR)):
+        app.logger.info("Creating assets directory: {}".format(config_obj.ASSETS_DIR))
+        os.makedirs(config_obj.ASSETS_DIR)
+
+    if(not os.path.exists(config_obj.SOUNDS_DIR)):
+        app.logger.info("Creating sounds directory: {}".format(config_obj.SOUNDS_DIR))
+        os.makedirs(config_obj.SOUNDS_DIR)
+    if(not os.path.exists(config_obj.METADATA_DIR)):
+        app.logger.info("Creating metadata directory: {}".format(config_obj.METADATA_DIR))
+        os.makedirs(config_obj.METADATA_DIR)
+
+
     app.config.from_object(config_obj)
     app.config["CONFIG_OBJ"] = config_obj
     app.config["JWT_BLACKLIST_ENABLED"] = True
     app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access"]
 
     # initialize database
+    if(not os.path.exists(config_obj.DB_FILE)):
+        app.logger.info("Will create database file: {}".format(config_obj.DB_FILE))
+
     init_db(config_obj)
 
     # Inject config into Jinja templates

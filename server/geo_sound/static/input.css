@@ -76,9 +76,20 @@
   }
 
   .track-title {
-    @apply font-semibold px-1 rounded;
+    @apply font-semibold break-words leading-tight;
     color: var(--track-color, #3388ff);
-    background-color: var(--track-bg, transparent);
+
+    display: -webkit-box;
+    /* enables multi-line ellipsis */
+    -webkit-line-clamp: 2;
+    /* show max 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    /* break long words if needed */
+    max-height: 3.2em;
+    /* ~2 lines based on font size */
   }
 
   .track-header {
@@ -212,6 +223,19 @@
 
   .popup-title {
     @apply block text-center font-semibold text-gray-800;
+
+    display: -webkit-box;
+    /* enables multi-line ellipsis */
+    -webkit-line-clamp: 2;
+    /* show max 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    /* break long words if needed */
+    max-height: 3.2em;
+    /* ~2 lines based on font size */
+
   }
 
   .popup-toggle {

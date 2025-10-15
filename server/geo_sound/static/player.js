@@ -8,22 +8,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = el.closest("[id^='track-']").id.replace("track-", "");
     window.PLAYERS[name] = player;
 
-
-
-
-const playerRoot = player.elements.container; // Plyr's main container
-const current = playerRoot.querySelector(".plyr__time--current");
-const duration = playerRoot.querySelector(".plyr__time--duration");
+    const playerRoot = player.elements.container; // Plyr's main container
+    const current = playerRoot.querySelector(".plyr__time--current");
+    const duration = playerRoot.querySelector(".plyr__time--duration");
 
     if (current && duration && !playerRoot.querySelector(".plyr-time-row")) {
-  const timeRow = document.createElement("div");
-  timeRow.classList.add("plyr-time-row");
+      const timeRow = document.createElement("div");
+      timeRow.classList.add("plyr-time-row");
 
-  timeRow.appendChild(current);
-  timeRow.appendChild(duration);
+      timeRow.appendChild(current);
+      timeRow.appendChild(duration);
 
-  playerRoot.querySelector(".plyr__controls").appendChild(timeRow);
-}
+      playerRoot.querySelector(".plyr__controls").appendChild(timeRow);
+    }
   });
 
   // Select controls containers

@@ -19,35 +19,68 @@ function clearToken() {
 async function register() {
   const username = document.getElementById("auth-username").value.trim();
   const password = document.getElementById("auth-password").value.trim();
+  const statusEl = document.getElementById("auth-status");
 
-  const res = await fetch(window.BASE_AUTH_REGISTER_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+  statusEl.innerText = ""; // clear previous message
+  statusEl.className = "text-sm"; // reset classes
 
-  const data = await res.json();
-  document.getElementById("auth-status").innerText = data.message || data.error;
+  try {
+    const res = await fetch(window.BASE_AUTH_REGISTER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await res.json();
+
+    statusEl.innerText = data.message || data.error || "Unknown response";
+
+    if (res.ok) {
+      statusEl.classList.add("text-green-600");
+      login();
+    } else {
+      statusEl.classList.add("text-red-600");
+    }
+  } catch (err) {
+    console.error("Register error:", err);
+    statusEl.innerText = "Registration failed. Please try again.";
+    statusEl.classList.add("text-red-600");
+  }
 }
 
 async function login() {
   const username = document.getElementById("auth-username").value.trim();
   const password = document.getElementById("auth-password").value.trim();
+  const statusEl = document.getElementById("auth-status");
 
-  const res = await fetch(window.BASE_AUTH_LOGIN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+  statusEl.innerText = ""; // clear previous message
+  statusEl.className = "text-sm"; // reset classes
 
-  const data = await res.json();
+  try {
+    const res = await fetch(window.BASE_AUTH_LOGIN_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
 
-  if (res.ok && data.access_token) {
-    setToken(data.access_token, data.username);
-    document.getElementById("auth-logged-in-status").innerText = `✅ Logged in as ${data.username}`;
-    updateAuthUI();
-  } else {
-    document.getElementById("auth-status").innerText = data.error || "Login failed";
+    const data = await res.json();
+
+    if (res.ok && data.access_token) {
+      setToken(data.access_token, data.username);
+      document.getElementById("auth-logged-in-status").innerText =
+        `✅ Logged in as ${data.username}`;
+      updateAuthUI();
+
+      statusEl.innerText = "Login successful!";
+      statusEl.classList.add("text-green-600");
+    } else {
+      statusEl.innerText = data.error || "Login failed";
+      statusEl.classList.add("text-red-600");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    statusEl.innerText = "Login failed. Please try again.";
+    statusEl.classList.add("text-red-600");
   }
 }
 
