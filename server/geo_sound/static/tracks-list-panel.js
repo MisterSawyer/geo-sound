@@ -84,7 +84,11 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleBtn.classList.remove("hover:bg-gray-100");
     } else {
       // Reset to default gray
-      toggleBtn.classList.remove("bg-green-600", "text-white", "border-green-700");
+      toggleBtn.classList.remove(
+        "bg-green-600",
+        "text-white",
+        "border-green-700"
+      );
       toggleBtn.classList.add("hover:bg-gray-100");
     }
   }
@@ -126,9 +130,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const titleQuery = titleInput.value.trim().toLowerCase();
     const ownerQuery = ownerInput.value.trim().toLowerCase();
     const dateFrom = dateFromInput.value; // 'YYYY-MM-DD' or ''
-    const dateTo = dateToInput.value;     // 'YYYY-MM-DD' or ''
+    const dateTo = dateToInput.value; // 'YYYY-MM-DD' or ''
 
     const cards = document.querySelectorAll("#tracks-list-panel .track-card");
+    const visibleTrackIds = [];
 
     cards.forEach((card) => {
       const titleEl = card.querySelector(".track-title");
@@ -176,7 +181,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       card.style.display = visible ? "" : "none";
+
+      if (visible) {
+        visibleTrackIds.push(card.id);
+      }
     });
+
+    // update the map to show only filtered tracks
+    if (window.applyTrackFilter) {
+        console.log(visibleTrackIds);
+      window.applyTrackFilter(visibleTrackIds);
+    }
   }
 
   const filterInputs = [titleInput, ownerInput, dateFromInput, dateToInput];

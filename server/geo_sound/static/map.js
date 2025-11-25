@@ -44,9 +44,9 @@ document.addEventListener("DOMContentLoaded", function () {
       // On popup open → clone template fresh, fill in, attach
       marker.on("popupopen", () => {
         // Remove "active" from all tracks
-        document.querySelectorAll("[id^='track-']").forEach((el) =>
-          el.classList.remove("active")
-        );
+        document
+          .querySelectorAll("[id^='track-']")
+          .forEach((el) => el.classList.remove("active"));
 
         // Highlight the matching track in sidebar
         const trackEl = document.getElementById(`track-${trackId}`);
@@ -106,7 +106,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
           const fmt = (sec) => {
             const m = Math.floor(sec / 60);
-            const s = Math.floor(sec % 60).toString().padStart(2, "0");
+            const s = Math.floor(sec % 60)
+              .toString()
+              .padStart(2, "0");
             return `${m}:${s}`;
           };
           timeLabel.textContent = `${fmt(player.currentTime)} / ${fmt(
@@ -123,11 +125,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         updateToggleIcon();
-//open the tracks list panel
-  if (typeof window.openTracksList === "function") {
-
-    window.openTracksList();
-  }
+        //open the tracks list panel
+        if (typeof window.openTracksList === "function") {
+          window.openTracksList();
+        }
 
         // Finally, inject into popup
         marker.setPopupContent(popupDiv);
@@ -159,6 +160,41 @@ function showAddTrackMarker(lat, lon) {
 function hideAddTrackMarker() {
   addTrackMarker.setStyle({ opacity: 0, fillOpacity: 0 });
 }
+
+// --- Filtering helper: show only selected tracks on the map ---
+window.applyTrackFilter = function (visibleIds) {
+  // normalize to Set for fast lookup
+  const visibleSet = new Set(visibleIds);
+
+  // Show / hide markers
+  Object.entries(window.MARKERS).forEach(([trackId, marker]) => {
+    const shouldBeVisible = visibleSet.has(`track-${trackId}`);
+
+    console.log(trackId, shouldBeVisible);
+
+    if (shouldBeVisible) {
+      if (!window.MAP.hasLayer(marker)) {
+        marker.addTo(window.MAP);
+      }
+    } else {
+      if (window.MAP.hasLayer(marker)) {
+        window.MAP.removeLayer(marker);
+      }
+    }
+  });
+
+  // Recompute bounds only from visible markers
+  const bounds = L.latLngBounds([]);
+  Object.values(window.MARKERS).forEach((marker) => {
+    if (window.MAP.hasLayer(marker)) {
+      bounds.extend(marker.getLatLng());
+    }
+  });
+
+  if (bounds.isValid()) {
+    window.MAP.fitBounds(bounds.pad(0.5));
+  }
+};
 
 window.showAddTrackMarker = showAddTrackMarker;
 window.hideAddTrackMarker = hideAddTrackMarker;
