@@ -36,7 +36,7 @@ def login():
 def me():
     """Return current logged in user info."""
     username = get_jwt_identity()
-    return jsonify({"username": username}), 200
+    return jsonify({"username": username, "is_admin": username in current_app.config["CONFIG_OBJ"].admins}), 200
 
 @JWT.token_in_blocklist_loader
 def check_if_token_revoked(jwt_header, jwt_payload):
