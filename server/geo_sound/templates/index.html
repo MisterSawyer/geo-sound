@@ -49,6 +49,68 @@
     >
       <!-- tracks-list-panel -->
       <div id="tracks-list-panel" class="tracks-list-panel">
+        
+        <!-- Header row for the panel -->
+        <div class="flex items-center justify-between mb-3 px-1">
+          <h2
+            class="text-sm font-semibold text-gray-600 uppercase tracking-wide"
+          >
+            Tracks
+          </h2>
+          <button
+            id="toggle-filter"
+            type="button"
+            class="text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100"
+          >
+            FILTER
+          </button>
+        </div>
+
+        <!-- filters -->
+        <div
+          id="tracks-filter"
+          class="hidden mb-4 p-3 bg-white/70 rounded-lg shadow-sm border border-gray-200 space-y-2"
+        >
+          <div class="flex flex-col gap-2">
+            <input
+              id="filter-title"
+              type="text"
+              placeholder="Filter by track name…"
+              class="form-input w-full"
+            />
+            <input
+              id="filter-owner"
+              type="text"
+              placeholder="Filter by owner…"
+              class="form-input w-full"
+            />
+          </div>
+
+          <div class="mt-2">
+            <p class="text-xs text-gray-500 mb-1">Filter by recorded date:</p>
+            <div class="flex items-center gap-2">
+              <input
+                id="filter-date-from"
+                type="date"
+                class="form-input flex-1"
+              />
+              <span class="text-xs text-gray-400">to</span>
+              <input
+                id="filter-date-to"
+                type="date"
+                class="form-input flex-1"
+              />
+              <button
+                id="filter-clear"
+                type="button"
+                class="text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
         {% for track in tracks %}
         <div
           id="track-{{ track.metadata.title }}"
@@ -94,20 +156,22 @@
           </div>
 
           {% if track.metadata.recorded_at %}
-          <p id="track-recorded-{{ track.metadata.title }}"
-             data-recorded="{{ track.metadata.recorded_at }}"
-             class="text-sm text-gray-400 mb-2">
+          <p
+            id="track-recorded-{{ track.metadata.title }}"
+            data-recorded="{{ track.metadata.recorded_at }}"
+            class="text-sm text-gray-400 mb-2"
+          >
             🗓️ {{ track.metadata.recorded_at }}
           </p>
           {% else %}
-          <p id="track-recorded-{{ track.metadata.title }}"
-             data-recorded=""
-             class="text-sm text-gray-400 mb-2 hidden">
+          <p
+            id="track-recorded-{{ track.metadata.title }}"
+            data-recorded=""
+            class="text-sm text-gray-400 mb-2 hidden"
+          >
             <!-- becomes visible when user sets it -->
           </p>
-          {% endif %}
-
-          {% if track.metadata.lat and track.metadata.lon %}
+          {% endif %} {% if track.metadata.lat and track.metadata.lon %}
           <p
             id="track-coords-{{ track.metadata.title }}"
             data-lat="{{ track.metadata.lat }}"
@@ -227,13 +291,13 @@
             class="form-input"
           />
           <div class="flex items-center gap-2">
-          <input
-            type="datetime-local"
-            id="form-recorded-at"
-            name="recorded_at"
-            placeholder="Recorded At"
-            class="form-input w-full placeholder-gray"
-          />
+            <input
+              type="datetime-local"
+              id="form-recorded-at"
+              name="recorded_at"
+              placeholder="Recorded At"
+              class="form-input w-full placeholder-gray"
+            />
           </div>
           <input
             id="form-lat"
@@ -333,7 +397,10 @@
     <template id="track-edit-recorded-template">
       <div class="flex items-center gap-2">
         <span class="text-sm text-gray-600">🗓️</span>
-        <input type="datetime-local" class="edit-recorded form-input w-56 text-sm" />
+        <input
+          type="datetime-local"
+          class="edit-recorded form-input w-56 text-sm"
+        />
       </div>
     </template>
 
